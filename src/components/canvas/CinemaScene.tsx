@@ -18,7 +18,7 @@ function SceneWorld({ scrollProgress, hoveredProject }: CinemaSceneProps) {
   useFrame((state) => {
     // Thread & world descends smoothly with scroll progress
     if (worldGroupRef.current) {
-      const targetY = scrollProgress * 7.2;
+      const targetY = scrollProgress * 8.6;
       worldGroupRef.current.position.y = THREE.MathUtils.lerp(worldGroupRef.current.position.y, targetY, 0.08);
 
       // Subtle mouse parallax on the world
@@ -37,12 +37,12 @@ function SceneWorld({ scrollProgress, hoveredProject }: CinemaSceneProps) {
 
       {/* 2. World Group that scrolls down through Projects */}
       <group ref={worldGroupRef} position={[0, 0, 0]}>
-        {/* Dynamic Liquid Fluid-Fill 3D Thread with project junction docking ports */}
+        {/* Dynamic Liquid Fluid-Fill 3D Thread with 5 project junction docking ports */}
         <CurvedThread3D scrollProgress={scrollProgress} />
 
         {/* Ambient Spatial Grids */}
-        <gridHelper args={[32, 48, '#06b6d4', '#1e293b']} position={[0, -2.4, 0]} />
-        <gridHelper args={[32, 48, '#06b6d4', '#1e293b']} position={[0, -7.2, 0]} />
+        <gridHelper args={[32, 48, '#06b6d4', '#1e293b']} position={[0, -2.5, 0]} />
+        <gridHelper args={[32, 48, '#06b6d4', '#1e293b']} position={[0, -8.0, 0]} />
       </group>
 
       {/* 3. Magnetic Floating Hover Portal (Tracks cursor, only active on project name hover!) */}

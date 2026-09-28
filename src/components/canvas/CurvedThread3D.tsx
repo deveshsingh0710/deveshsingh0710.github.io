@@ -14,54 +14,58 @@ export function CurvedThread3D({ scrollProgress }: CurvedThread3DProps) {
   const headLightRef = useRef<THREE.PointLight>(null);
   const outerGlassMatRef = useRef<THREE.MeshPhysicalMaterial>(null);
 
-  // Junction node refs for projects
+  // 5 Junction dock refs along the conduit
   const dock1Ref = useRef<THREE.Mesh>(null);
   const dock2Ref = useRef<THREE.Mesh>(null);
   const dock3Ref = useRef<THREE.Mesh>(null);
+  const dock4Ref = useRef<THREE.Mesh>(null);
+  const dock5Ref = useRef<THREE.Mesh>(null);
 
   // High-precision organic curved glass conduit positioned in the right visual gutter
   const curve = useMemo(() => {
     const points = [
-      new THREE.Vector3(1.8, -1.4, 0.2),   // Starts at top of Projects section
-      new THREE.Vector3(1.3, -2.8, -0.15), // Curves toward Project 1 (Quantum)
-      new THREE.Vector3(2.1, -4.3, 0.25),  // Curves toward Project 2 (Vision)
-      new THREE.Vector3(1.4, -5.9, -0.1),  // Curves toward Project 3 (Healthcare)
-      new THREE.Vector3(1.8, -7.2, 0.1),   // Terminal finish
-      new THREE.Vector3(1.6, -8.2, 0.0),   // Bottom anchor
+      new THREE.Vector3(1.8, -1.2, 0.2),   // Starts at top of projects runway
+      new THREE.Vector3(1.3, -2.6, -0.15), // Point 1: Project 1 (Quantum)
+      new THREE.Vector3(2.1, -4.1, 0.25),  // Point 2: Project 2 (Vision)
+      new THREE.Vector3(1.4, -5.6, -0.1),  // Point 3: Project 3 (Healthcare)
+      new THREE.Vector3(2.0, -7.1, 0.2),   // Point 4: Specialization & Skills
+      new THREE.Vector3(1.5, -8.6, -0.1),  // Point 5: Direct Transmission / Contact
+      new THREE.Vector3(1.7, -9.6, 0.0),   // Terminal anchor
     ];
     return new THREE.CatmullRomCurve3(points, false, 'catmullrom', 0.5);
   }, []);
 
   // 1. Outer Transparent Glass Conduit Pipe
   const glassGeometry = useMemo(() => {
-    return new THREE.TubeGeometry(curve, 220, 0.038, 16, false);
+    return new THREE.TubeGeometry(curve, 260, 0.038, 16, false);
   }, [curve]);
 
   // 2. Inner Neon Liquid Fluid Core (Rendered dynamically via setDrawRange)
   const fluidGeometry = useMemo(() => {
-    const geo = new THREE.TubeGeometry(curve, 220, 0.024, 16, false);
-    return geo;
+    return new THREE.TubeGeometry(curve, 260, 0.024, 16, false);
   }, [curve]);
 
   // Total indices in the fluid tube geometry
   const totalIndices = useMemo(() => {
-    return fluidGeometry.index ? fluidGeometry.index.count : 220 * 16 * 6;
+    return fluidGeometry.index ? fluidGeometry.index.count : 260 * 16 * 6;
   }, [fluidGeometry]);
 
-  // Junction dock positions matching DOCK_POSITIONS
+  // 5 Junction dock positions matching DOCK_POSITIONS
   const dockPositions = useMemo(() => {
     return [
-      curve.getPointAt(DOCK_POSITIONS.PROJECT_1), // Project 1 dock (0.22)
-      curve.getPointAt(DOCK_POSITIONS.PROJECT_2), // Project 2 dock (0.52)
-      curve.getPointAt(DOCK_POSITIONS.PROJECT_3), // Project 3 dock (0.82)
+      curve.getPointAt(DOCK_POSITIONS.PROJECT_1),      // 0.16
+      curve.getPointAt(DOCK_POSITIONS.PROJECT_2),      // 0.36
+      curve.getPointAt(DOCK_POSITIONS.PROJECT_3),      // 0.56
+      curve.getPointAt(DOCK_POSITIONS.SPECIALIZATION), // 0.76
+      curve.getPointAt(DOCK_POSITIONS.TRANSMISSION),   // 0.94
     ];
   }, [curve]);
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
 
-    // Fade in visibility as we scroll from Hero into Projects
-    const visibility = THREE.MathUtils.clamp((scrollProgress - 0.04) / 0.08, 0, 1);
+    // Fade in visibility as we scroll out of Hero into the conduit pipeline
+    const visibility = THREE.MathUtils.clamp((scrollProgress - 0.03) / 0.06, 0, 1);
 
     if (outerGlassMatRef.current) {
       outerGlassMatRef.current.opacity = visibility * 0.45;
@@ -73,7 +77,6 @@ export function CurvedThread3D({ scrollProgress }: CurvedThread3DProps) {
     // Update draw range on fluid geometry to physically fill/drain the liquid
     if (fluidGeometry) {
       const drawCount = Math.floor(totalIndices * fluidProgress);
-      // Tube faces are sets of 3 indices, align to multiples of 6
       const safeDrawCount = Math.floor(drawCount / 6) * 6;
       fluidGeometry.setDrawRange(0, safeDrawCount);
     }
@@ -104,24 +107,26 @@ export function CurvedThread3D({ scrollProgress }: CurvedThread3DProps) {
       const mat = mesh.material as THREE.MeshStandardMaterial;
       if (!mat) return;
 
-      const isCurrentActive = Math.abs(fluidProgress - dockT) < 0.07;
+      const isCurrentActive = Math.abs(fluidProgress - dockT) < 0.055;
       const isPassed = fluidProgress >= dockT;
 
       if (isCurrentActive) {
         // High-energy pulsing beacon when fluid is actively docked
-        mat.emissiveIntensity = 3.5 + Math.sin(t * 7) * 1.2;
+        mat.emissiveIntensity = 3.6 + Math.sin(t * 8) * 1.2;
       } else if (isPassed) {
         // Latched illuminated state
-        mat.emissiveIntensity = 1.4;
+        mat.emissiveIntensity = 1.3;
       } else {
         // Standby state
-        mat.emissiveIntensity = 0.3;
+        mat.emissiveIntensity = 0.25;
       }
     };
 
     updateDock(dock1Ref.current, DOCK_POSITIONS.PROJECT_1);
     updateDock(dock2Ref.current, DOCK_POSITIONS.PROJECT_2);
     updateDock(dock3Ref.current, DOCK_POSITIONS.PROJECT_3);
+    updateDock(dock4Ref.current, DOCK_POSITIONS.SPECIALIZATION);
+    updateDock(dock5Ref.current, DOCK_POSITIONS.TRANSMISSION);
   });
 
   return (
@@ -166,20 +171,30 @@ export function CurvedThread3D({ scrollProgress }: CurvedThread3DProps) {
 
       <pointLight ref={headLightRef} color="#00e5ff" intensity={0} distance={5} />
 
-      {/* 4. Project Junction Docking Rings along the pipe */}
+      {/* 4. 5 Project Junction Docking Rings along the pipe */}
       <mesh ref={dock1Ref} position={dockPositions[0]}>
         <torusGeometry args={[0.065, 0.014, 16, 32]} />
-        <meshStandardMaterial color="#00e5ff" emissive="#00e5ff" emissiveIntensity={0.3} metalness={0.9} />
+        <meshStandardMaterial color="#00e5ff" emissive="#00e5ff" emissiveIntensity={0.25} metalness={0.9} />
       </mesh>
 
       <mesh ref={dock2Ref} position={dockPositions[1]}>
         <torusGeometry args={[0.065, 0.014, 16, 32]} />
-        <meshStandardMaterial color="#00e5ff" emissive="#00e5ff" emissiveIntensity={0.3} metalness={0.9} />
+        <meshStandardMaterial color="#00e5ff" emissive="#00e5ff" emissiveIntensity={0.25} metalness={0.9} />
       </mesh>
 
       <mesh ref={dock3Ref} position={dockPositions[2]}>
         <torusGeometry args={[0.065, 0.014, 16, 32]} />
-        <meshStandardMaterial color="#06b6d4" emissive="#06b6d4" emissiveIntensity={0.3} metalness={0.9} />
+        <meshStandardMaterial color="#00e5ff" emissive="#00e5ff" emissiveIntensity={0.25} metalness={0.9} />
+      </mesh>
+
+      <mesh ref={dock4Ref} position={dockPositions[3]}>
+        <torusGeometry args={[0.065, 0.014, 16, 32]} />
+        <meshStandardMaterial color="#00e5ff" emissive="#00e5ff" emissiveIntensity={0.25} metalness={0.9} />
+      </mesh>
+
+      <mesh ref={dock5Ref} position={dockPositions[4]}>
+        <torusGeometry args={[0.065, 0.014, 16, 32]} />
+        <meshStandardMaterial color="#06b6d4" emissive="#06b6d4" emissiveIntensity={0.25} metalness={0.9} />
       </mesh>
     </group>
   );

@@ -49,12 +49,29 @@ export function useSmoothScroll() {
     };
   }, []);
 
-  const scrollToSection = (sectionId: string) => {
-    const el = document.getElementById(sectionId);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
+  const scrollToProgress = (progress: number) => {
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    if (maxScroll > 0) {
+      window.scrollTo({ top: progress * maxScroll, behavior: 'smooth' });
     }
   };
 
-  return { scrollProgress, scrollToSection };
+  const scrollToSection = (sectionId: string) => {
+    if (sectionId === 'hero') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (sectionId === 'projects-scroll-track' || sectionId === 'architectures') {
+      scrollToProgress(0.18);
+    } else if (sectionId === 'about' || sectionId === 'specialization') {
+      scrollToProgress(0.74);
+    } else if (sectionId === 'contact' || sectionId === 'transmission') {
+      scrollToProgress(0.95);
+    } else {
+      const el = document.getElementById(sectionId);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  };
+
+  return { scrollProgress, scrollToSection, scrollToProgress };
 }
