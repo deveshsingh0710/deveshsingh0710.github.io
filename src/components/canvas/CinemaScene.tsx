@@ -18,15 +18,15 @@ function SceneWorld({ scrollProgress, projectsProgress, isInsideProjects, hovere
   const worldGroupRef = useRef<THREE.Group>(null);
 
   useFrame((state) => {
-    // Thread & world descends smoothly with projects progress
+    // Thread descends strictly when inside projects section
     if (worldGroupRef.current) {
-      const targetY = isInsideProjects ? projectsProgress * 6.6 : scrollProgress < 0.3 ? 0 : 6.6;
-      worldGroupRef.current.position.y = THREE.MathUtils.lerp(worldGroupRef.current.position.y, targetY, 0.08);
+      const targetY = isInsideProjects ? projectsProgress * 6.6 : 0;
+      worldGroupRef.current.position.y = THREE.MathUtils.lerp(worldGroupRef.current.position.y, targetY, 0.1);
 
-      // Subtle mouse parallax on the world
+      // Subtle gentle pointer parallax
       worldGroupRef.current.rotation.y = THREE.MathUtils.lerp(
         worldGroupRef.current.rotation.y,
-        state.pointer.x * 0.06,
+        state.pointer.x * 0.04,
         0.05
       );
     }
@@ -37,14 +37,9 @@ function SceneWorld({ scrollProgress, projectsProgress, isInsideProjects, hovere
       {/* 1. Interactive 3D Hero Object for Opening Frame */}
       <HeroInteractive3D scrollProgress={scrollProgress} />
 
-      {/* 2. World Group that scrubs through Projects */}
+      {/* 2. World Group for Projects (Only visible when active in projects) */}
       <group ref={worldGroupRef} position={[0, 0, 0]}>
-        {/* Dynamic Liquid Fluid-Fill 3D Thread with 3 project junction docking ports */}
         <CurvedThread3D projectsProgress={projectsProgress} isInsideProjects={isInsideProjects} />
-
-        {/* Ambient Spatial Grids */}
-        <gridHelper args={[32, 48, '#06b6d4', '#1e293b']} position={[0, -2.5, 0]} />
-        <gridHelper args={[32, 48, '#06b6d4', '#1e293b']} position={[0, -6.5, 0]} />
       </group>
 
       {/* 3. Magnetic Floating Hover Portal (Tracks cursor, only active on project name hover!) */}
@@ -68,24 +63,23 @@ export const CinemaScene = memo(function CinemaScene({
           alpha: true,
           powerPreference: 'high-performance',
           toneMapping: THREE.ACESFilmicToneMapping,
-          toneMappingExposure: 1.35,
+          toneMappingExposure: 1.1,
         }}
         dpr={[1, 1.5]}
       >
-        {/* Cinematic Studio Lighting */}
-        <ambientLight intensity={1.2} />
-        <directionalLight position={[6, 9, 6]} intensity={3.5} color="#e0f2fe" />
-        <directionalLight position={[-6, -4, -3]} intensity={2.6} color="#00e5ff" />
-        <directionalLight position={[0, -6, 5]} intensity={2.0} color="#818cf8" />
+        {/* Balanced, Sophisticated Studio Lighting (No harsh blinding overexposure) */}
+        <ambientLight intensity={0.45} />
+        <directionalLight position={[5, 8, 5]} intensity={1.4} color="#e0f2fe" />
+        <directionalLight position={[-5, -3, -2]} intensity={0.9} color="#00e5ff" />
 
-        {/* Lightweight Floating Atmospheric Cyber Sparkles */}
+        {/* Lightweight subtle atmospheric particles */}
         <Sparkles
-          count={45}
-          scale={[20, 22, 16]}
-          size={1.6}
-          speed={0.25}
-          opacity={0.4}
-          color="#00e5ff"
+          count={25}
+          scale={[18, 18, 14]}
+          size={1.4}
+          speed={0.2}
+          opacity={0.3}
+          color="#22d3ee"
         />
 
         <SceneWorld
@@ -95,15 +89,15 @@ export const CinemaScene = memo(function CinemaScene({
           hoveredProject={hoveredProject}
         />
 
-        {/* High-Performance Post-Processing: multisampling=0 for 60-120fps smoothness */}
+        {/* High-Performance Bloom: Selective, crisp, non-blurry glow strictly on emissive nodes */}
         <EffectComposer multisampling={0}>
           <Bloom
-            luminanceThreshold={0.5}
-            luminanceSmoothing={0.8}
-            intensity={1.3}
+            luminanceThreshold={0.82}
+            luminanceSmoothing={0.7}
+            intensity={1.1}
             mipmapBlur
           />
-          <Vignette eskil={false} offset={0.08} darkness={0.65} />
+          <Vignette eskil={false} offset={0.1} darkness={0.5} />
         </EffectComposer>
       </Canvas>
     </div>

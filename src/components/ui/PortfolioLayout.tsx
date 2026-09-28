@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Volume2, VolumeX, Sparkles, Send, ArrowUpRight, Cpu, Copy, Check,
-  ChevronDown, Code2, Globe, Layers, ArrowRight
+  ChevronDown, Code2, Globe, Layers, ArrowRight, Terminal as TerminalIcon,
+  Play, Activity
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { GithubIcon } from './Icons';
@@ -32,6 +33,14 @@ export function PortfolioLayout({
   const [copiedSnippet, setCopiedSnippet] = useState(false);
   const [contactSubmitted, setContactSubmitted] = useState(false);
   const [contactForm, setContactForm] = useState({ name: '', email: '', message: '' });
+
+  // Interactive Live Terminal State
+  const [terminalInput, setTerminalInput] = useState('');
+  const [terminalLogs, setTerminalLogs] = useState<string[]>([
+    "Devesh AI Environment v2.4 initialized.",
+    "Type 'help' to inspect available system commands."
+  ]);
+  const terminalBottomRef = useRef<HTMLDivElement>(null);
 
   // Fluid checkpoint calculation strictly within #projects
   const activeCheckpoint = isInsideProjects ? getActiveCheckpoint(projectsProgress) : null;
@@ -97,6 +106,39 @@ export function PortfolioLayout({
     }, 4000);
   };
 
+  const handleTerminalSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const cmd = terminalInput.trim().toLowerCase();
+    sounds.playClick();
+
+    let reply = '';
+    if (cmd === 'help') {
+      reply = "Commands: 'skills', 'projects', 'bio', 'status', 'clear'";
+    } else if (cmd === 'skills') {
+      reply = "Core: C++, Python, DSA | AI: PyTorch, OpenCV, YOLOv8 | Web: React, FastAPI, Node";
+    } else if (cmd === 'projects') {
+      reply = "01: Quantum-Tunneling (PINN) | 02: LabelChecker (Vision) | 03: Telemetry Engine";
+    } else if (cmd === 'bio') {
+      reply = "Devesh Singh Rathore • CSE Student & ML Builder • Focused on low-latency AI & PDEs.";
+    } else if (cmd === 'status') {
+      reply = "TensorRT 10.2: ACTIVE • WebGL Conduit: 60 FPS • Unitarity: 99.8%";
+    } else if (cmd === 'clear') {
+      setTerminalLogs([]);
+      setTerminalInput('');
+      return;
+    } else if (cmd === '') {
+      return;
+    } else {
+      reply = `Command not recognized: '${cmd}'. Type 'help' for options.`;
+    }
+
+    setTerminalLogs((prev) => [...prev, `$ ${terminalInput}`, reply]);
+    setTerminalInput('');
+    setTimeout(() => {
+      terminalBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 50);
+  };
+
   const openLink = (url: string) => {
     window.open(url, '_blank', 'noopener,noreferrer');
   };
@@ -126,7 +168,7 @@ export function PortfolioLayout({
       {/* ========================================================
           TOP NAVIGATION HEADER (With Dynamic ScrollSpy)
       ======================================================== */}
-      <header className="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-6 md:px-12 py-3.5 bg-[#080B14]/85 border-b border-white/[0.08] backdrop-blur-xl">
+      <header className="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-6 md:px-12 py-3 bg-[#080B14]/90 border-b border-white/[0.08] backdrop-blur-xl">
         <div className="flex items-center space-x-3 cursor-pointer" onClick={() => onScrollTo('hero')}>
           <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#0052F2] to-[#22D3EE] p-[1px] shadow-lg shadow-cyan-500/20">
             <div className="w-full h-full bg-[#080B14] rounded-lg flex items-center justify-center text-cyan-300 font-mono-code font-bold text-xs">
@@ -146,7 +188,7 @@ export function PortfolioLayout({
         </div>
 
         {/* ScrollSpy Navigation Links */}
-        <nav className="hidden md:flex items-center space-x-2 bg-slate-900/60 p-1 rounded-full border border-white/[0.06]">
+        <nav className="hidden md:flex items-center space-x-1 bg-slate-900/70 p-1 rounded-full border border-white/[0.06]">
           <button onClick={() => onScrollTo('hero')} className={getNavLinkClass('hero')}>
             Home
           </button>
@@ -186,7 +228,7 @@ export function PortfolioLayout({
       </header>
 
       {/* ========================================================
-          01 // HERO SECTION (Aligned strictly within max-w-6xl)
+          01 // HERO SECTION (Strictly aligned to max-w-6xl)
       ======================================================== */}
       <section id="hero" className="min-h-screen flex items-center px-6 md:px-12 pt-24 pb-16">
         <div className="w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
@@ -212,7 +254,7 @@ export function PortfolioLayout({
               {DEVELOPER_BIO.bio}
             </p>
 
-            {/* Action Buttons matching design */}
+            {/* Action Buttons */}
             <div className="pt-2 flex flex-wrap items-center gap-4">
               <button
                 onClick={() => onScrollTo('projects')}
@@ -244,7 +286,7 @@ export function PortfolioLayout({
           {/* Right Hero Visual: Floating Glass Code Window + Badge */}
           <div className="lg:col-span-5 relative flex flex-col items-center justify-center">
             {/* Ambient Backlight Ribbon */}
-            <div className="absolute -inset-4 bg-gradient-to-tr from-[#0052F2]/20 via-[#22D3EE]/20 to-[#8B5CF6]/20 rounded-3xl blur-2xl -z-10" />
+            <div className="absolute -inset-4 bg-gradient-to-tr from-[#0052F2]/15 via-[#22D3EE]/15 to-[#8B5CF6]/15 rounded-3xl blur-2xl -z-10" />
 
             {/* Glass Code Editor Window */}
             <div className="spotlight-card w-full max-w-md p-4 sm:p-5 rounded-2xl border border-cyan-500/30 bg-[#0F172A]/90 backdrop-blur-2xl shadow-2xl space-y-3">
@@ -254,8 +296,16 @@ export function PortfolioLayout({
                   <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80" />
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
                 </div>
-                <span className="text-[10px] font-mono-code text-slate-400">developer.ts</span>
-                <Code2 className="w-3.5 h-3.5 text-cyan-400" />
+                <div className="flex items-center space-x-2">
+                  <span className="text-[10px] font-mono-code text-slate-400">developer.ts</span>
+                  <button
+                    onClick={handleCopySnippet}
+                    className="flex items-center space-x-1 text-[10px] font-mono-code text-slate-400 hover:text-cyan-300 transition-colors cursor-pointer"
+                    title="Copy code"
+                  >
+                    {copiedSnippet ? <Check className="w-3 h-3 text-cyan-400" /> : <Copy className="w-3 h-3" />}
+                  </button>
+                </div>
               </div>
 
               <pre className="text-xs font-mono-code text-slate-300 leading-relaxed overflow-x-auto">
@@ -289,13 +339,13 @@ export function PortfolioLayout({
         </div>
       </section>
 
-      {/* Smooth Ambient Gradient Transition */}
+      {/* Smooth Subtle Gradient Transition */}
       <div className="w-full max-w-6xl mx-auto px-6 md:px-12">
-        <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-cyan-500/25 to-transparent" />
+        <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-cyan-500/20 to-transparent" />
       </div>
 
       {/* ========================================================
-          02 // ABOUT SECTION (Aligned strictly within max-w-6xl)
+          02 // ABOUT & INTERACTIVE WORKSTATION SECTION
       ======================================================== */}
       <section id="about" className="py-24 px-6 md:px-12">
         <div className="w-full max-w-6xl mx-auto space-y-12">
@@ -308,9 +358,9 @@ export function PortfolioLayout({
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            {/* Story Details */}
-            <div className="lg:col-span-7 space-y-4 text-xs sm:text-sm text-slate-300 font-mono-code leading-relaxed">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            {/* Story Details & Pillars */}
+            <div className="lg:col-span-6 space-y-4 text-xs sm:text-sm text-slate-300 font-mono-code leading-relaxed">
               <p>
                 I am a Computer Science student and software engineer driven by an obsession with how code shapes intelligent, interactive systems. My work bridges the gap between deep mathematical theory (like PDE solvers and computational physics) and production-grade architectures.
               </p>
@@ -320,61 +370,79 @@ export function PortfolioLayout({
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3">
                 <div className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800">
-                  <span className="text-[#22D3EE] font-bold block mb-1">01 / Algorithmic Core</span>
-                  <span className="text-[11px] text-slate-400">Deep expertise in C++, Data Structures, and computational math.</span>
+                  <span className="text-[#22D3EE] font-bold block mb-1">01 / Algorithmic</span>
+                  <span className="text-[11px] text-slate-400">Deep expertise in C++, Data Structures, and math.</span>
                 </div>
                 <div className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800">
                   <span className="text-[#8B5CF6] font-bold block mb-1">02 / Applied AI</span>
-                  <span className="text-[11px] text-slate-400">PyTorch, YOLOv8, and custom neural feature backbones.</span>
+                  <span className="text-[11px] text-slate-400">PyTorch, YOLOv8, and custom neural backbones.</span>
                 </div>
                 <div className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800">
-                  <span className="text-[#D8FF64] font-bold block mb-1">03 / Modern Systems</span>
-                  <span className="text-[11px] text-slate-400">FastAPI, Docker, PostgreSQL, and low-latency microservices.</span>
+                  <span className="text-[#D8FF64] font-bold block mb-1">03 / Modern Web</span>
+                  <span className="text-[11px] text-slate-400">FastAPI, Docker, PostgreSQL, and low latency.</span>
                 </div>
               </div>
             </div>
 
-            {/* Code Showcase Card (from image design) */}
-            <div className="lg:col-span-5">
+            {/* Interactive Live Terminal Box (destroys generic AI template look!) */}
+            <div className="lg:col-span-6">
               <div className="spotlight-card p-4 sm:p-5 rounded-2xl border border-cyan-500/30 bg-[#0F172A]/90 backdrop-blur-xl shadow-2xl space-y-3">
                 <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                  <span className="text-[10px] font-mono-code text-cyan-400 uppercase tracking-wider">
-                    // Code Showcase
+                  <div className="flex items-center space-x-2">
+                    <TerminalIcon className="w-4 h-4 text-cyan-400" />
+                    <span className="text-[11px] font-mono-code text-cyan-300 font-bold uppercase tracking-wider">
+                      Interactive Shell Runtime
+                    </span>
+                  </div>
+                  <span className="text-[9px] font-mono-code px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    Live
                   </span>
-                  <button
-                    onClick={handleCopySnippet}
-                    className="flex items-center space-x-1 px-2.5 py-1 rounded bg-slate-900 hover:bg-slate-800 text-[10px] font-mono-code text-slate-300 border border-slate-700 cursor-pointer transition-all"
-                  >
-                    {copiedSnippet ? <Check className="w-3 h-3 text-cyan-400" /> : <Copy className="w-3 h-3" />}
-                    <span>{copiedSnippet ? 'Copied' : 'Copy'}</span>
-                  </button>
                 </div>
 
-                <pre className="text-xs font-mono-code text-slate-300 leading-relaxed overflow-x-auto">
-                  <span className="text-[#8B5CF6]">const</span> <span className="text-[#22D3EE]">createAmazingThings</span> = () =&gt; &#123;{'\n'}
-                  {'  '}<span className="text-[#8B5CF6]">return</span> &#123;{'\n'}
-                  {'    '}<span className="text-slate-400">developer:</span> <span className="text-[#D8FF64]">"Devesh Singh Rathore"</span>,{'\n'}
-                  {'    '}<span className="text-slate-400">focus:</span> [<span className="text-[#22D3EE]">"DSA"</span>, <span className="text-[#22D3EE]">"AI & ML"</span>, <span className="text-[#22D3EE]">"Web"</span>],{'\n'}
-                  {'    '}<span className="text-slate-400">passion:</span> <span className="text-[#D8FF64]">"coding"</span>,{'\n'}
-                  {'    '}<span className="text-slate-400">goal:</span> <span className="text-[#D8FF64]">"impact"</span>,{'\n'}
-                  {'  '}&#125;;{'\n'}
-                  &#125;;
-                </pre>
+                {/* Terminal Console Output */}
+                <div className="p-3 rounded-xl bg-slate-950/90 border border-slate-800/80 font-mono-code text-[11px] h-44 overflow-y-auto space-y-1.5 text-slate-300">
+                  {terminalLogs.map((log, index) => (
+                    <div key={index} className={log.startsWith('$') ? 'text-cyan-400 font-bold' : 'text-slate-300'}>
+                      {log}
+                    </div>
+                  ))}
+                  <div ref={terminalBottomRef} />
+                </div>
+
+                {/* Terminal Command Input */}
+                <form onSubmit={handleTerminalSubmit} className="flex items-center space-x-2">
+                  <div className="relative flex-1">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-cyan-400 font-mono-code text-xs font-bold">$</span>
+                    <input
+                      type="text"
+                      value={terminalInput}
+                      onChange={(e) => setTerminalInput(e.target.value)}
+                      placeholder="Try typing: skills, projects, bio, status..."
+                      className="w-full pl-7 pr-3 py-2 rounded-xl bg-slate-950/80 border border-slate-800 focus:border-cyan-400 text-xs font-mono-code text-slate-200 outline-none transition-all"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="px-3.5 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs font-mono-code transition-all cursor-pointer flex items-center space-x-1"
+                  >
+                    <Play className="w-3 h-3 fill-current" />
+                  </button>
+                </form>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Smooth Ambient Gradient Transition */}
+      {/* Smooth Subtle Gradient Transition */}
       <div className="w-full max-w-6xl mx-auto px-6 md:px-12">
-        <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-cyan-500/25 to-transparent" />
+        <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-cyan-500/20 to-transparent" />
       </div>
 
       {/* ========================================================
           03 // PROJECTS SECTION (THE 3D FLUID THREAD CONDUIT)
-          - Aligned STRICTLY to the exact same left column!
-          - Well-balanced with Stepper, Telemetry HUD & Stage Indicators!
+          - Thread is 100% INVISIBLE before this section!
+          - Card is locked in max-w-6xl column! Zero jump!
       ======================================================== */}
       <section id="projects" className="relative min-h-[280vh]">
         {/* Section Intro Banner inside max-w-6xl */}
@@ -390,13 +458,20 @@ export function PortfolioLayout({
           </p>
         </div>
 
-        {/* ========================================================
-            FIXED FLOATING HUD PROJECT CARD
-            - Aligned perfectly with max-w-6xl mx-auto px-6 md:px-12!
-            - No more jumping to the screen edges!
-            - APPEARS ONLY AT DOCK CHECKPOINTS!
-            - DISAPPEARS ("HAT JATA HAI") WHEN SCROLLING BETWEEN POINTS!
-        ======================================================== */}
+        {/* Real-time Telemetry HUD (Fixed top indicator while inside #projects) */}
+        {isInsideProjects && (
+          <div className="fixed top-20 left-6 md:left-12 z-30 flex items-center space-x-3 text-[11px] font-mono-code bg-[#080B14]/90 px-3.5 py-1.5 rounded-xl border border-cyan-500/30 backdrop-blur-xl shadow-lg">
+            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+            <span className="text-slate-400">CONDUIT FLUID:</span>
+            <span className="text-cyan-300 font-bold">{(projectsProgress * 100).toFixed(0)}%</span>
+            <span className="text-slate-500">|</span>
+            <span className="text-emerald-400 font-semibold">
+              {activeCheckpoint !== null ? `PROJECT 0${activeCheckpoint} DOCKED` : 'CONDUIT IN TRANSIT...'}
+            </span>
+          </div>
+        )}
+
+        {/* Fixed HUD Project Card Container - Aligned strictly with max-w-6xl! */}
         <div className="fixed top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 w-full max-w-6xl px-6 md:px-12 z-30 pointer-events-none">
           <div
             className={`w-full max-w-[420px] transition-all duration-300 ease-out ${
@@ -438,7 +513,7 @@ export function PortfolioLayout({
               </span>
             </div>
 
-            {/* Spotlight Card */}
+            {/* Spotlight Project Card */}
             {currentProject && (
               <div
                 onMouseMove={handleCardMouseMove}
@@ -504,6 +579,23 @@ export function PortfolioLayout({
                   </div>
                 </div>
 
+                {/* Interactive Sparkline Loss/Accuracy Visualizer */}
+                <div className="p-2 rounded-xl bg-slate-950/60 border border-slate-800/60 flex items-center justify-between text-[10px] font-mono-code text-slate-400">
+                  <span className="flex items-center space-x-1 text-slate-400">
+                    <Activity className="w-3 h-3 text-cyan-400" />
+                    <span>Convergence Curve:</span>
+                  </span>
+                  <div className="flex items-end space-x-1 h-4">
+                    {currentProject.sparklineData.map((val, idx) => (
+                      <div
+                        key={idx}
+                        style={{ height: `${Math.min(Math.max((val / 100) * 16, 3), 16)}px` }}
+                        className="w-1 bg-cyan-400/80 rounded-t-sm"
+                      />
+                    ))}
+                  </div>
+                </div>
+
                 {/* Specs Row */}
                 <div className="flex items-center justify-between pt-1 border-t border-slate-800/60 text-[10px] font-mono-code">
                   <div className="flex items-center space-x-2">
@@ -517,7 +609,7 @@ export function PortfolioLayout({
 
                   <div className="flex items-center space-x-1">
                     {currentProject.techStack.slice(0, 2).map((tech, idx) => (
-                      <span key={idx} className="px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 text-[9px]">
+                      <span key={idx} className="px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 text-[8px]">
                         {tech}
                       </span>
                     ))}
@@ -541,9 +633,9 @@ export function PortfolioLayout({
         </div>
       </section>
 
-      {/* Smooth Ambient Gradient Transition */}
+      {/* Smooth Subtle Gradient Transition */}
       <div className="w-full max-w-6xl mx-auto px-6 md:px-12">
-        <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-cyan-500/25 to-transparent" />
+        <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-cyan-500/20 to-transparent" />
       </div>
 
       {/* ========================================================
@@ -614,9 +706,9 @@ export function PortfolioLayout({
         </div>
       </section>
 
-      {/* Smooth Ambient Gradient Transition */}
+      {/* Smooth Subtle Gradient Transition */}
       <div className="w-full max-w-6xl mx-auto px-6 md:px-12">
-        <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-cyan-500/25 to-transparent" />
+        <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-cyan-500/20 to-transparent" />
       </div>
 
       {/* ========================================================
@@ -758,7 +850,7 @@ export function PortfolioLayout({
       </section>
 
       {/* ========================================================
-          FOOTER (Aligned strictly to max-w-6xl)
+          FOOTER (Strictly aligned to max-w-6xl)
       ======================================================== */}
       <footer className="py-10 px-6 md:px-12 border-t border-slate-800/80 bg-[#080B14]/95 text-center text-xs font-mono-code text-slate-400 space-y-4">
         <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-center gap-6">
