@@ -12,7 +12,7 @@ export interface Project {
   codeSnippet: string;
   architecturePipeline: string[];
   benchmarkBadge: string;
-  sparklineData: number[]; // Points for mini loss/accuracy chart
+  sparklineData: number[];
   architectureNotes: string;
 }
 
@@ -133,31 +133,41 @@ export const PROJECTS: Project[] = [
 ];
 
 export const DEVELOPER_BIO = {
-  name: "Devesh Singh",
-  title: "Machine Learning Engineer",
-  location: "Global / Remote",
-  bio: "Specialized in deep learning architectures, computer vision pipelines, high-performance simulation engines, and distributed intelligence systems.",
+  name: "Devesh Singh Rathore",
+  shortName: "Devesh",
+  roleTitle: "CSE Student | Developer | Builder",
+  location: "India / Global Remote",
+  bio: "I love building interactive web experiences and solving real-world problems with code. Always learning, always creating.",
+  statsSummary: [
+    { number: "5+", label: "Projects" },
+    { number: "3+", label: "Technologies" },
+    { number: "1", label: "Goal" }
+  ],
   stats: [
-    { label: "PRIMARY FOCUS", value: "Deep Learning & Computer Vision" },
-    { label: "LANGUAGES", value: "Python, PyTorch, C++, TypeScript" },
-    { label: "SPECIALTY", value: "Edge AI & Computational Physics" }
+    { label: "PRIMARY FOCUS", value: "AI, Vision & Systems" },
+    { label: "LANGUAGES", value: "C++, Python, TypeScript" },
+    { label: "SPECIALTY", value: "DSA & Machine Learning" }
   ],
   skillClusters: [
     {
-      category: "Deep Learning & MLOps",
-      skills: ["PyTorch", "TensorFlow", "MLflow", "ONNX Runtime", "CUDA", "FastAPI"]
+      category: "Languages & Core",
+      color: "from-blue-500/20 to-cyan-500/20",
+      skills: ["C++", "Python", "TypeScript", "JavaScript", "SQL", "Data Structures (DSA)", "OOP"]
     },
     {
-      category: "Computer Vision & Edge AI",
-      skills: ["YOLOv8", "OpenCV", "TrOCR", "Segment Anything", "TensorRT", "DeepStream"]
+      category: "Machine Learning & Vision",
+      color: "from-cyan-500/20 to-teal-500/20",
+      skills: ["PyTorch", "TensorFlow", "OpenCV", "YOLOv8", "PDE Solvers", "NumPy", "SciPy"]
     },
     {
-      category: "Scientific Computing & Math",
-      skills: ["NumPy", "SciPy", "PDE Solvers", "Spectral FFT", "Monte Carlo", "Matrix Opt"]
+      category: "Web & Fullstack",
+      color: "from-purple-500/20 to-indigo-500/20",
+      skills: ["React", "FastAPI", "Node.js", "Tailwind CSS", "REST APIs", "Vite"]
     },
     {
-      category: "Systems & Infrastructure",
-      skills: ["C++", "Docker", "Linux / Bash", "PostgreSQL", "Kafka", "Git & CI/CD"]
+      category: "Tools & DevOps",
+      color: "from-emerald-500/20 to-cyan-500/20",
+      skills: ["Git & GitHub", "Docker", "Linux / Bash", "PostgreSQL", "Kafka"]
     }
   ],
   links: {

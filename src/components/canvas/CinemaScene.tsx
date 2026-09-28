@@ -9,16 +9,18 @@ import { HeroInteractive3D } from './HeroInteractive3D';
 
 interface CinemaSceneProps {
   scrollProgress: number; // 0.0 to 1.0 (real page scroll)
+  projectsProgress: number; // 0.0 to 1.0 (inside projects section)
+  isInsideProjects: boolean;
   hoveredProject: 'quantum' | 'vision' | 'healthcare' | null;
 }
 
-function SceneWorld({ scrollProgress, hoveredProject }: CinemaSceneProps) {
+function SceneWorld({ scrollProgress, projectsProgress, isInsideProjects, hoveredProject }: CinemaSceneProps) {
   const worldGroupRef = useRef<THREE.Group>(null);
 
   useFrame((state) => {
-    // Thread & world descends smoothly with scroll progress
+    // Thread & world descends smoothly with projects progress
     if (worldGroupRef.current) {
-      const targetY = scrollProgress * 6.6;
+      const targetY = isInsideProjects ? projectsProgress * 6.6 : scrollProgress < 0.3 ? 0 : 6.6;
       worldGroupRef.current.position.y = THREE.MathUtils.lerp(worldGroupRef.current.position.y, targetY, 0.08);
 
       // Subtle mouse parallax on the world
@@ -35,10 +37,10 @@ function SceneWorld({ scrollProgress, hoveredProject }: CinemaSceneProps) {
       {/* 1. Interactive 3D Hero Object for Opening Frame */}
       <HeroInteractive3D scrollProgress={scrollProgress} />
 
-      {/* 2. World Group that scrolls down through Projects */}
+      {/* 2. World Group that scrubs through Projects */}
       <group ref={worldGroupRef} position={[0, 0, 0]}>
         {/* Dynamic Liquid Fluid-Fill 3D Thread with 3 project junction docking ports */}
-        <CurvedThread3D scrollProgress={scrollProgress} />
+        <CurvedThread3D projectsProgress={projectsProgress} isInsideProjects={isInsideProjects} />
 
         {/* Ambient Spatial Grids */}
         <gridHelper args={[32, 48, '#06b6d4', '#1e293b']} position={[0, -2.5, 0]} />
@@ -51,7 +53,12 @@ function SceneWorld({ scrollProgress, hoveredProject }: CinemaSceneProps) {
   );
 }
 
-export const CinemaScene = memo(function CinemaScene({ scrollProgress, hoveredProject }: CinemaSceneProps) {
+export const CinemaScene = memo(function CinemaScene({
+  scrollProgress,
+  projectsProgress,
+  isInsideProjects,
+  hoveredProject
+}: CinemaSceneProps) {
   return (
     <div className="fixed inset-0 w-full h-full pointer-events-none z-0">
       <Canvas
@@ -81,7 +88,12 @@ export const CinemaScene = memo(function CinemaScene({ scrollProgress, hoveredPr
           color="#00e5ff"
         />
 
-        <SceneWorld scrollProgress={scrollProgress} hoveredProject={hoveredProject} />
+        <SceneWorld
+          scrollProgress={scrollProgress}
+          projectsProgress={projectsProgress}
+          isInsideProjects={isInsideProjects}
+          hoveredProject={hoveredProject}
+        />
 
         {/* High-Performance Post-Processing: multisampling=0 for 60-120fps smoothness */}
         <EffectComposer multisampling={0}>
