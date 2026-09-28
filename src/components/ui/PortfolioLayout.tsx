@@ -4,6 +4,7 @@ import confetti from 'canvas-confetti';
 import { GithubIcon } from './Icons';
 import { PROJECTS, DEVELOPER_BIO } from '../../data/projectsData';
 import { sounds } from '../../utils/audio';
+import { getFluidProgress, getActiveProjectIndex, FLUID_SCROLL_END } from '../../utils/fluidSync';
 
 interface PortfolioLayoutProps {
   scrollProgress: number;
@@ -16,25 +17,10 @@ export function PortfolioLayout({ scrollProgress, onScrollTo, onHoverProject }: 
   const [isMuted, setIsMuted] = useState(false);
   const [copiedCloneCmd, setCopiedCloneCmd] = useState(false);
 
-  // Synchronized fluid progress
-  const fluidProgress = Math.min(Math.max((scrollProgress - 0.05) / 0.75, 0), 1);
-
-  // Exact Checkpoint Windows for the 3 Projects:
-  // Dock 1: fluidProgress around 0.24 -> Active window: 0.18 to 0.35
-  // Dock 2: fluidProgress around 0.56 -> Active window: 0.48 to 0.65
-  // Dock 3: fluidProgress around 0.85 -> Active window: 0.74 to 0.88
-  // Outside these windows, activeIndex is NULL (card completely vanishes / "hat jaye")
-  // Past scrollProgress >= 0.78, projects phase is COMPLETELY finished so it NEVER overlaps About/Contact!
-  let activeIndex: number | null = null;
-  if (scrollProgress < 0.76) {
-    if (fluidProgress >= 0.18 && fluidProgress <= 0.35) {
-      activeIndex = 0; // Project 1: Quantum Tunneling
-    } else if (fluidProgress >= 0.48 && fluidProgress <= 0.65) {
-      activeIndex = 1; // Project 2: LabelChecker AI
-    } else if (fluidProgress >= 0.74 && fluidProgress <= 0.88) {
-      activeIndex = 2; // Project 3: Healthcare Telemetry
-    }
-  }
+  // Synchronized fluid progress computed via single source of truth
+  const fluidProgress = getFluidProgress(scrollProgress);
+  const activeIndex = getActiveProjectIndex(scrollProgress);
+  const activeProject = activeIndex !== null ? PROJECTS[activeIndex] : null;
 
   const toggleSound = () => {
     sounds.enabled = !sounds.enabled;
@@ -73,12 +59,10 @@ export function PortfolioLayout({ scrollProgress, onScrollTo, onHoverProject }: 
     e.currentTarget.style.setProperty('--mouse-y', `${y}px`);
   };
 
-  const activeProject = activeIndex !== null ? PROJECTS[activeIndex] : null;
-
   return (
     <div className="relative z-10 w-full text-slate-100 pointer-events-auto">
       {/* Top Glass Header */}
-      <header className="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-6 md:px-14 py-3.5 bg-slate-950/70 border-b border-white/10 backdrop-blur-xl">
+      <header className="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-6 md:px-14 py-3.5 bg-slate-950/75 border-b border-white/10 backdrop-blur-xl">
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-mono-code font-bold text-xs shadow-md shadow-cyan-500/10">
             DS
@@ -176,7 +160,7 @@ export function PortfolioLayout({ scrollProgress, onScrollTo, onHoverProject }: 
 
               <span className="text-xs font-mono-code text-slate-400 flex items-center space-x-2">
                 <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-                <span>Scroll down: cards reveal ONLY at thread checkpoints</span>
+                <span>Scroll down: cards reveal ONLY at fluid checkpoints</span>
               </span>
             </div>
           </div>
@@ -189,9 +173,9 @@ export function PortfolioLayout({ scrollProgress, onScrollTo, onHoverProject }: 
           PROJECTS SCROLL RUNWAY
           Spacious height so fluid smoothly scrubs across the 3 checkpoints.
       ======================================================== */}
-      <section id="projects-scroll-track" className="relative min-h-[220vh]">
+      <section id="projects-scroll-track" className="relative min-h-[260vh]">
         {/* Real-time Telemetry HUD (Fixed top indicator while scrubbing projects) */}
-        {scrollProgress > 0.08 && scrollProgress < 0.76 && (
+        {scrollProgress > 0.08 && scrollProgress < FLUID_SCROLL_END && (
           <div className="fixed top-20 left-6 md:left-14 z-30 flex items-center space-x-3 text-[11px] font-mono-code bg-slate-950/85 px-3.5 py-1.5 rounded-xl border border-cyan-500/30 backdrop-blur-xl shadow-lg">
             <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
             <span className="text-slate-400">FLUID PIPELINE:</span>
@@ -208,14 +192,14 @@ export function PortfolioLayout({ scrollProgress, onScrollTo, onHoverProject }: 
             - Locked in viewport: NEVER gets cut off!
             - Ultra-compact footprint (max-w-[400px])
             - APPEARS ONLY AT CHECKPOINTS!
-            - DISAPPEARS IN-BETWEEN AND BEFORE ABOUT SECTION!
+            - DISAPPEARS IN-BETWEEN AND COMPLETELY BEFORE ABOUT SECTION!
         ======================================================== */}
-        {scrollProgress < 0.76 && (
+        {scrollProgress < FLUID_SCROLL_END && (
           <div
-            className={`fixed left-6 md:left-14 top-1/2 -translate-y-1/2 z-30 w-full max-w-[400px] transition-all duration-300 ${
+            className={`fixed left-6 md:left-14 top-1/2 -translate-y-1/2 z-30 w-full max-w-[400px] transition-all duration-300 ease-out ${
               activeProject !== null
                 ? 'opacity-100 scale-100 pointer-events-auto translate-y-0'
-                : 'opacity-0 scale-95 pointer-events-none translate-y-4'
+                : 'opacity-0 scale-95 pointer-events-none translate-y-3'
             }`}
           >
             {activeProject && (
@@ -308,36 +292,39 @@ export function PortfolioLayout({ scrollProgress, onScrollTo, onHoverProject }: 
       </section>
 
       {/* ========================================================
-          ABOUT & CONTACT DESTINATION (Aligned neatly on the Left)
-          - Left-aligned (md:ml-14) matching the project card column!
-          - Compact width (max-w-xl) so right side fluid thread remains 100% visible!
-          - ZERO collision with project cards!
+          ABOUT & CONTACT DESTINATION
+          - Left-aligned (px-6 md:px-14) EXACTLY matching the project HUD column!
+          - Sleek, compact footprint (max-w-[420px]) - NO middle intrusion, NO bulkiness!
+          - ZERO collision: Project 3 is completely closed and unmounted before this enters!
       ======================================================== */}
-      <div className="relative z-20 px-6 md:px-14 pb-24 space-y-14 max-w-xl">
+      <div className="relative z-20 px-6 md:px-14 pt-10 pb-28 space-y-12 w-full max-w-[420px]">
         {/* About Section */}
-        <section id="about" className="pt-6">
-          <div className="spotlight-card p-5 sm:p-6 rounded-2xl shadow-xl space-y-4">
-            <div className="border-b border-slate-800/80 pb-3">
+        <section id="about">
+          <div
+            onMouseMove={handleCardMouseMove}
+            className="spotlight-card p-4 sm:p-5 rounded-2xl shadow-xl space-y-3.5 border border-cyan-500/25 bg-slate-900/90 backdrop-blur-xl"
+          >
+            <div className="border-b border-slate-800/80 pb-2.5">
               <span className="text-[10px] font-mono-code text-cyan-400 uppercase tracking-widest block">
-                02 // ENGINEERING PHILOSOPHY & TOOLCHAIN
+                02 // SPECIALIZATION & PHILOSOPHY
               </span>
-              <h2 className="text-xl sm:text-2xl font-extrabold font-display text-slate-100 mt-1">
+              <h2 className="text-lg sm:text-xl font-bold font-display text-slate-100 mt-1">
                 Precision Over Hype.
               </h2>
-              <p className="text-xs text-slate-300 font-mono-code leading-relaxed mt-2">
+              <p className="text-xs text-slate-300 font-mono-code leading-relaxed mt-1.5">
                 {DEVELOPER_BIO.bio}
               </p>
             </div>
 
             {/* Compact Clustered Skills Grid */}
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {DEVELOPER_BIO.skillClusters.map((cluster, cIdx) => (
-                <div key={cIdx} className="space-y-1.5">
-                  <span className="text-[10px] uppercase font-mono-code font-bold tracking-wider text-cyan-400 flex items-center space-x-1">
+                <div key={cIdx} className="space-y-1">
+                  <span className="text-[9px] uppercase font-mono-code font-bold tracking-wider text-cyan-400 flex items-center space-x-1">
                     <Cpu className="w-3 h-3 text-cyan-400" />
                     <span>{cluster.category}</span>
                   </span>
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="flex flex-wrap gap-1">
                     {cluster.skills.map((skill, sIdx) => {
                       const isSelected = selectedSkill === skill;
                       return (
@@ -347,10 +334,10 @@ export function PortfolioLayout({ scrollProgress, onScrollTo, onHoverProject }: 
                             sounds.playClick();
                             setSelectedSkill(isSelected ? null : skill);
                           }}
-                          className={`px-2 py-0.5 text-[10px] font-mono-code rounded border transition-all cursor-pointer ${
+                          className={`px-2 py-0.5 text-[9px] font-mono-code rounded border transition-all cursor-pointer ${
                             isSelected
                               ? 'bg-cyan-500 text-slate-950 border-cyan-400 font-bold shadow-md shadow-cyan-500/30'
-                              : 'bg-slate-900 border-slate-700/80 text-slate-300 hover:border-cyan-500/50 hover:text-cyan-300'
+                              : 'bg-slate-900/80 border-slate-700/70 text-slate-300 hover:border-cyan-500/50 hover:text-cyan-300'
                           }`}
                         >
                           {skill}
@@ -366,72 +353,75 @@ export function PortfolioLayout({ scrollProgress, onScrollTo, onHoverProject }: 
 
         {/* Contact Section */}
         <section id="contact">
-          <div className="spotlight-card p-5 sm:p-6 rounded-2xl shadow-xl space-y-4">
+          <div
+            onMouseMove={handleCardMouseMove}
+            className="spotlight-card p-4 sm:p-5 rounded-2xl shadow-xl space-y-3.5 border border-cyan-500/25 bg-slate-900/90 backdrop-blur-xl"
+          >
             <div>
               <span className="text-[10px] font-mono-code text-cyan-400 uppercase tracking-widest block">
                 03 // DIRECT TRANSMISSION
               </span>
-              <h2 className="text-xl sm:text-3xl font-black font-display text-slate-100 mt-1">
+              <h2 className="text-lg sm:text-xl font-bold font-display text-slate-100 mt-1">
                 Let's Build.
               </h2>
-              <p className="text-xs text-slate-300 font-mono-code leading-relaxed mt-1.5">
-                Looking for a Machine Learning Engineer to design resilient deep learning models, high-performance vision pipelines, or distributed systems? Connect directly below.
+              <p className="text-xs text-slate-300 font-mono-code leading-relaxed mt-1">
+                Looking for a Machine Learning Engineer to design resilient deep learning models or low-latency computer vision systems?
               </p>
             </div>
 
             {/* Compact CLI Terminal Clone Command */}
-            <div className="p-2.5 rounded-xl bg-slate-900/90 border border-slate-700/70 flex items-center justify-between font-mono-code text-xs">
-              <div className="flex items-center space-x-2 text-slate-200 overflow-x-auto text-[11px]">
+            <div className="p-2 rounded-xl bg-slate-950/80 border border-slate-800/80 flex items-center justify-between font-mono-code text-xs">
+              <div className="flex items-center space-x-2 text-slate-200 overflow-x-auto text-[10px]">
                 <span className="text-cyan-400 font-bold">$</span>
                 <span>git clone https://github.com/deveshsingh0710.git</span>
               </div>
               <button
                 onClick={handleCopyClone}
-                className="ml-2 px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-[10px] shrink-0 flex items-center space-x-1 cursor-pointer"
+                className="ml-2 px-2 py-0.5 rounded bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700 text-[10px] shrink-0 flex items-center space-x-1 cursor-pointer"
               >
                 {copiedCloneCmd ? <Check className="w-3 h-3 text-cyan-400" /> : <Copy className="w-3 h-3" />}
                 <span>{copiedCloneCmd ? 'Copied' : 'Copy'}</span>
               </button>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <a
                 href={DEVELOPER_BIO.links.github}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-between p-3 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700/60 transition-all text-xs font-mono-code group"
+                className="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-700/60 transition-all text-xs font-mono-code group"
               >
-                <div className="flex items-center space-x-2.5">
-                  <GithubIcon className="w-4 h-4 text-cyan-400" />
-                  <span>GitHub Repositories & Open Source</span>
+                <div className="flex items-center space-x-2">
+                  <GithubIcon className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>GitHub Repositories</span>
                 </div>
-                <span className="text-slate-400 group-hover:text-cyan-400 flex items-center space-x-1">
+                <span className="text-slate-400 group-hover:text-cyan-400 flex items-center space-x-1 text-[11px]">
                   <span>@deveshsingh0710</span>
-                  <ArrowUpRight className="w-3.5 h-3.5" />
+                  <ArrowUpRight className="w-3 h-3" />
                 </span>
               </a>
 
               <a
                 href={DEVELOPER_BIO.links.email}
-                className="flex items-center justify-between p-3 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700/60 transition-all text-xs font-mono-code group"
+                className="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-700/60 transition-all text-xs font-mono-code group"
               >
-                <div className="flex items-center space-x-2.5">
-                  <Send className="w-4 h-4 text-cyan-400" />
-                  <span>Encrypted Email Transmission</span>
+                <div className="flex items-center space-x-2">
+                  <Send className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Encrypted Email</span>
                 </div>
-                <span className="text-slate-400 group-hover:text-cyan-400 flex items-center space-x-1">
-                  <span>Send Direct Inquiry</span>
-                  <ArrowUpRight className="w-3.5 h-3.5" />
+                <span className="text-slate-400 group-hover:text-cyan-400 flex items-center space-x-1 text-[11px]">
+                  <span>Send Inquiry</span>
+                  <ArrowUpRight className="w-3 h-3" />
                 </span>
               </a>
             </div>
 
-            <div className="pt-1 flex items-center justify-center">
+            <div className="pt-0.5 flex items-center justify-center">
               <button
                 onClick={handleCelebrate}
-                className="flex items-center space-x-2 px-5 py-2 rounded-full bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 text-xs font-mono-code transition-all cursor-pointer shadow-lg shadow-cyan-500/10 hover:scale-105"
+                className="flex items-center space-x-2 px-4 py-1.5 rounded-full bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 text-xs font-mono-code transition-all cursor-pointer shadow-lg shadow-cyan-500/10 hover:scale-105"
               >
-                <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-spin" style={{ animationDuration: '8s' }} />
+                <Sparkles className="w-3 h-3 text-cyan-400 animate-spin" style={{ animationDuration: '8s' }} />
                 <span>Stamp Verification Seal (Celebrate)</span>
               </button>
             </div>

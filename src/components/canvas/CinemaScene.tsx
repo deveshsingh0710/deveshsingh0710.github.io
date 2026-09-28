@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, memo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Sparkles } from '@react-three/drei';
 import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
@@ -24,7 +24,7 @@ function SceneWorld({ scrollProgress, hoveredProject }: CinemaSceneProps) {
       // Subtle mouse parallax on the world
       worldGroupRef.current.rotation.y = THREE.MathUtils.lerp(
         worldGroupRef.current.rotation.y,
-        state.pointer.x * 0.08,
+        state.pointer.x * 0.06,
         0.05
       );
     }
@@ -41,8 +41,8 @@ function SceneWorld({ scrollProgress, hoveredProject }: CinemaSceneProps) {
         <CurvedThread3D scrollProgress={scrollProgress} />
 
         {/* Ambient Spatial Grids */}
-        <gridHelper args={[32, 64, '#06b6d4', '#1e293b']} position={[0, -2.4, 0]} />
-        <gridHelper args={[32, 64, '#06b6d4', '#1e293b']} position={[0, -7.2, 0]} />
+        <gridHelper args={[32, 48, '#06b6d4', '#1e293b']} position={[0, -2.4, 0]} />
+        <gridHelper args={[32, 48, '#06b6d4', '#1e293b']} position={[0, -7.2, 0]} />
       </group>
 
       {/* 3. Magnetic Floating Hover Portal (Tracks cursor, only active on project name hover!) */}
@@ -51,7 +51,7 @@ function SceneWorld({ scrollProgress, hoveredProject }: CinemaSceneProps) {
   );
 }
 
-export function CinemaScene({ scrollProgress, hoveredProject }: CinemaSceneProps) {
+export const CinemaScene = memo(function CinemaScene({ scrollProgress, hoveredProject }: CinemaSceneProps) {
   return (
     <div className="fixed inset-0 w-full h-full pointer-events-none z-0">
       <Canvas
@@ -63,34 +63,32 @@ export function CinemaScene({ scrollProgress, hoveredProject }: CinemaSceneProps
           toneMapping: THREE.ACESFilmicToneMapping,
           toneMappingExposure: 1.35,
         }}
-        dpr={[1, 2]}
+        dpr={[1, 1.5]}
       >
-        {/* Transparent background so CSS cosmic glowing orbs and cyber grid show through */}
-
         {/* Cinematic Studio Lighting */}
         <ambientLight intensity={1.2} />
         <directionalLight position={[6, 9, 6]} intensity={3.5} color="#e0f2fe" />
         <directionalLight position={[-6, -4, -3]} intensity={2.6} color="#00e5ff" />
         <directionalLight position={[0, -6, 5]} intensity={2.0} color="#818cf8" />
 
-        {/* Floating Atmospheric Cyber Sparkles */}
+        {/* Lightweight Floating Atmospheric Cyber Sparkles */}
         <Sparkles
-          count={100}
+          count={45}
           scale={[20, 22, 16]}
-          size={1.8}
-          speed={0.3}
-          opacity={0.45}
+          size={1.6}
+          speed={0.25}
+          opacity={0.4}
           color="#00e5ff"
         />
 
         <SceneWorld scrollProgress={scrollProgress} hoveredProject={hoveredProject} />
 
-        {/* High-End Post-Processing: Soft Selective Bloom & Subtle Vignette */}
-        <EffectComposer multisampling={4}>
+        {/* High-Performance Post-Processing: multisampling=0 for 60-120fps smoothness */}
+        <EffectComposer multisampling={0}>
           <Bloom
-            luminanceThreshold={0.48}
+            luminanceThreshold={0.5}
             luminanceSmoothing={0.8}
-            intensity={1.4}
+            intensity={1.3}
             mipmapBlur
           />
           <Vignette eskil={false} offset={0.08} darkness={0.65} />
@@ -98,4 +96,4 @@ export function CinemaScene({ scrollProgress, hoveredProject }: CinemaSceneProps
       </Canvas>
     </div>
   );
-}
+});

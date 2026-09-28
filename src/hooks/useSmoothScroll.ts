@@ -4,35 +4,48 @@ export function useSmoothScroll() {
   const [scrollProgress, setScrollProgress] = useState(0);
   const targetProgress = useRef(0);
   const currentProgress = useRef(0);
+  const isAnimating = useRef(false);
+  const animId = useRef<number | null>(null);
 
   useEffect(() => {
-    let animId: number;
+    const updateLoop = () => {
+      const diff = targetProgress.current - currentProgress.current;
+
+      if (Math.abs(diff) < 0.0004) {
+        currentProgress.current = targetProgress.current;
+        setScrollProgress(targetProgress.current);
+        isAnimating.current = false;
+        animId.current = null;
+        return; // Settle and stop loop to save CPU & GPU cycles
+      }
+
+      currentProgress.current += diff * 0.12;
+      setScrollProgress(currentProgress.current);
+      animId.current = requestAnimationFrame(updateLoop);
+    };
 
     const handleScroll = () => {
       const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
       if (maxScroll > 0) {
         targetProgress.current = Math.min(Math.max(window.scrollY / maxScroll, 0), 1);
       }
-    };
 
-    const updateLoop = () => {
-      // Butter-smooth lerp damping
-      const diff = targetProgress.current - currentProgress.current;
-      currentProgress.current += diff * 0.08;
-
-      setScrollProgress(currentProgress.current);
-      animId = requestAnimationFrame(updateLoop);
+      if (!isAnimating.current) {
+        isAnimating.current = true;
+        animId.current = requestAnimationFrame(updateLoop);
+      }
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    animId = requestAnimationFrame(updateLoop);
-
-    // Initial check
+    
+    // Initial sync
     handleScroll();
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      cancelAnimationFrame(animId);
+      if (animId.current !== null) {
+        cancelAnimationFrame(animId.current);
+      }
     };
   }, []);
 

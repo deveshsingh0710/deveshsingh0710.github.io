@@ -1,6 +1,7 @@
 import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { getFluidProgress, DOCK_POSITIONS } from '../../utils/fluidSync';
 
 interface CurvedThread3DProps {
   scrollProgress: number; // 0.0 to 1.0
@@ -47,28 +48,27 @@ export function CurvedThread3D({ scrollProgress }: CurvedThread3DProps) {
     return fluidGeometry.index ? fluidGeometry.index.count : 220 * 16 * 6;
   }, [fluidGeometry]);
 
-  // Junction dock positions
+  // Junction dock positions matching DOCK_POSITIONS
   const dockPositions = useMemo(() => {
     return [
-      curve.getPointAt(0.24), // Project 1 dock
-      curve.getPointAt(0.56), // Project 2 dock
-      curve.getPointAt(0.85), // Project 3 dock
+      curve.getPointAt(DOCK_POSITIONS.PROJECT_1), // Project 1 dock (0.22)
+      curve.getPointAt(DOCK_POSITIONS.PROJECT_2), // Project 2 dock (0.52)
+      curve.getPointAt(DOCK_POSITIONS.PROJECT_3), // Project 3 dock (0.82)
     ];
   }, [curve]);
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
 
-    // Fade in visibility as we scroll from Hero into Projects (0.05 to 0.15)
-    const visibility = THREE.MathUtils.clamp((scrollProgress - 0.04) / 0.1, 0, 1);
+    // Fade in visibility as we scroll from Hero into Projects
+    const visibility = THREE.MathUtils.clamp((scrollProgress - 0.04) / 0.08, 0, 1);
 
     if (outerGlassMatRef.current) {
       outerGlassMatRef.current.opacity = visibility * 0.45;
     }
 
-    // Dynamic fluid fill factor: 0.0 at top of projects, 1.0 at bottom
-    // When user scrolls down, fluid fills; when scrolling up, fluid drains!
-    const fluidProgress = THREE.MathUtils.clamp((scrollProgress - 0.06) / 0.84, 0, 1);
+    // Dynamic fluid fill factor computed strictly via shared formula
+    const fluidProgress = getFluidProgress(scrollProgress);
 
     // Update draw range on fluid geometry to physically fill/drain the liquid
     if (fluidGeometry) {
@@ -85,7 +85,7 @@ export function CurvedThread3D({ scrollProgress }: CurvedThread3DProps) {
       headRef.current.position.copy(pos);
 
       // Droplet pulses with liquid tension and fades if empty
-      const isFlowing = fluidProgress > 0.01;
+      const isFlowing = fluidProgress > 0.005;
       const pulse = (1 + Math.sin(t * 9) * 0.25) * (isFlowing ? visibility : 0);
       headRef.current.scale.set(pulse, pulse, pulse);
     }
@@ -94,23 +94,34 @@ export function CurvedThread3D({ scrollProgress }: CurvedThread3DProps) {
       const sampleT = Math.max(0.001, Math.min(fluidProgress, 0.999));
       const pos = curve.getPointAt(sampleT);
       headLightRef.current.position.copy(pos);
-      const isFlowing = fluidProgress > 0.01;
+      const isFlowing = fluidProgress > 0.005;
       headLightRef.current.intensity = (4.0 + Math.sin(t * 8) * 1.5) * (isFlowing ? visibility : 0);
     }
 
     // Animate Junction Dock Port Rings
-    const updateDock = (mesh: THREE.Mesh | null, threshold: number) => {
+    const updateDock = (mesh: THREE.Mesh | null, dockT: number) => {
       if (!mesh) return;
-      const isReached = fluidProgress >= threshold;
       const mat = mesh.material as THREE.MeshStandardMaterial;
-      if (mat) {
-        mat.emissiveIntensity = isReached ? 2.5 + Math.sin(t * 5) * 0.8 : 0.4;
+      if (!mat) return;
+
+      const isCurrentActive = Math.abs(fluidProgress - dockT) < 0.07;
+      const isPassed = fluidProgress >= dockT;
+
+      if (isCurrentActive) {
+        // High-energy pulsing beacon when fluid is actively docked
+        mat.emissiveIntensity = 3.5 + Math.sin(t * 7) * 1.2;
+      } else if (isPassed) {
+        // Latched illuminated state
+        mat.emissiveIntensity = 1.4;
+      } else {
+        // Standby state
+        mat.emissiveIntensity = 0.3;
       }
     };
 
-    updateDock(dock1Ref.current, 0.24);
-    updateDock(dock2Ref.current, 0.56);
-    updateDock(dock3Ref.current, 0.85);
+    updateDock(dock1Ref.current, DOCK_POSITIONS.PROJECT_1);
+    updateDock(dock2Ref.current, DOCK_POSITIONS.PROJECT_2);
+    updateDock(dock3Ref.current, DOCK_POSITIONS.PROJECT_3);
   });
 
   return (
@@ -158,17 +169,17 @@ export function CurvedThread3D({ scrollProgress }: CurvedThread3DProps) {
       {/* 4. Project Junction Docking Rings along the pipe */}
       <mesh ref={dock1Ref} position={dockPositions[0]}>
         <torusGeometry args={[0.065, 0.014, 16, 32]} />
-        <meshStandardMaterial color="#00e5ff" emissive="#00e5ff" emissiveIntensity={0.4} metalness={0.9} />
+        <meshStandardMaterial color="#00e5ff" emissive="#00e5ff" emissiveIntensity={0.3} metalness={0.9} />
       </mesh>
 
       <mesh ref={dock2Ref} position={dockPositions[1]}>
         <torusGeometry args={[0.065, 0.014, 16, 32]} />
-        <meshStandardMaterial color="#00e5ff" emissive="#00e5ff" emissiveIntensity={0.4} metalness={0.9} />
+        <meshStandardMaterial color="#00e5ff" emissive="#00e5ff" emissiveIntensity={0.3} metalness={0.9} />
       </mesh>
 
       <mesh ref={dock3Ref} position={dockPositions[2]}>
         <torusGeometry args={[0.065, 0.014, 16, 32]} />
-        <meshStandardMaterial color="#06b6d4" emissive="#06b6d4" emissiveIntensity={0.4} metalness={0.9} />
+        <meshStandardMaterial color="#06b6d4" emissive="#06b6d4" emissiveIntensity={0.3} metalness={0.9} />
       </mesh>
     </group>
   );
