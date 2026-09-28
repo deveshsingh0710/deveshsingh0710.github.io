@@ -59,12 +59,12 @@ export function useSmoothScroll() {
   const scrollToSection = (sectionId: string) => {
     if (sectionId === 'hero') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else if (sectionId === 'projects-scroll-track' || sectionId === 'architectures') {
-      scrollToProgress(0.18);
-    } else if (sectionId === 'about' || sectionId === 'specialization') {
-      scrollToProgress(0.74);
-    } else if (sectionId === 'contact' || sectionId === 'transmission') {
-      scrollToProgress(0.95);
+    } else if (sectionId === 'p1' || sectionId === 'quantum' || sectionId === 'projects') {
+      scrollToProgress(0.24);
+    } else if (sectionId === 'p2' || sectionId === 'vision') {
+      scrollToProgress(0.56);
+    } else if (sectionId === 'p3' || sectionId === 'telemetry') {
+      scrollToProgress(0.86);
     } else {
       const el = document.getElementById(sectionId);
       if (el) {
