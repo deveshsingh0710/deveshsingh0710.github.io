@@ -91,14 +91,14 @@ export const PROJECTS: Project[] = [
 
 export const DEVELOPER_BIO = {
   name: "Devesh Singh",
-  title: "Software Engineer & Systems Builder",
+  title: "Machine Learning Engineer",
   location: "Global / Remote",
-  bio: "Passionate engineer specialized in scalable distributed systems, high-performance algorithms, computer vision pipelines, and modern interactive web graphics.",
+  bio: "Specialized in deep learning architectures, computer vision pipelines, high-performance simulation engines, and distributed intelligence systems.",
   stats: [
-    { label: "Primary Languages", value: "Python, TypeScript, C++, Go" },
-    { label: "Specialties", value: "Systems, Simulation, AI/CV, WebGL" },
-    { label: "Architecture", value: "Microservices, Distributed Data, Real-time APIs" },
-    { label: "Philosophy", value: "Speed, Mathematical Precision & Flawless UX" }
+    { label: "Core Focus", value: "Machine Learning & Computer Vision" },
+    { label: "Primary Languages", value: "Python, PyTorch, C++, TypeScript" },
+    { label: "Specialties", value: "Deep Learning, Physics Simulation, Distributed AI" },
+    { label: "Philosophy", value: "Mathematical Precision, Speed & Production Reliability" }
   ],
   skills: [
     "Python", "TypeScript", "React", "Node.js", "Docker", "PostgreSQL",
