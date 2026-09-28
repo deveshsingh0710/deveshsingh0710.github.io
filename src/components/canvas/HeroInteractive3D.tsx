@@ -70,24 +70,24 @@ export function HeroInteractive3D({ scrollProgress }: HeroInteractive3DProps) {
         <mesh ref={coreRef}>
           <icosahedronGeometry args={[0.9, 1]} />
           <meshPhysicalMaterial
-            color="#064e3b"
-            emissive="#10b981"
-            emissiveIntensity={1.8}
+            color="#0891b2"
+            emissive="#00e5ff"
+            emissiveIntensity={2.5}
             wireframe
-            roughness={0.1}
+            roughness={0.08}
             metalness={0.9}
-            transmission={0.4}
+            transmission={0.5}
           />
         </mesh>
 
         {/* 2. Inner Glowing Quantum Energy Sphere */}
         <mesh ref={innerRef}>
-          <sphereGeometry args={[0.42, 32, 32]} />
+          <sphereGeometry args={[0.44, 32, 32]} />
           <meshStandardMaterial
-            color="#34d399"
-            emissive="#10b981"
-            emissiveIntensity={3.5}
-            roughness={0.1}
+            color="#67e8f9"
+            emissive="#00e5ff"
+            emissiveIntensity={4.2}
+            roughness={0.08}
             metalness={0.8}
           />
         </mesh>
@@ -102,11 +102,11 @@ export function HeroInteractive3D({ scrollProgress }: HeroInteractive3DProps) {
                 key={idx}
                 position={[Math.cos(angle) * radius, Math.sin(angle) * 0.3, Math.sin(angle) * radius]}
               >
-                <sphereGeometry args={[0.045, 16, 16]} />
+                <sphereGeometry args={[0.048, 16, 16]} />
                 <meshStandardMaterial
                   color="#ffffff"
-                  emissive="#6ee7b7"
-                  emissiveIntensity={4.0}
+                  emissive="#38bdf8"
+                  emissiveIntensity={4.5}
                 />
               </mesh>
             );
@@ -117,9 +117,9 @@ export function HeroInteractive3D({ scrollProgress }: HeroInteractive3DProps) {
         <mesh ref={ring1Ref}>
           <torusGeometry args={[1.3, 0.016, 16, 120]} />
           <meshStandardMaterial
-            color="#6ee7b7"
-            emissive="#10b981"
-            emissiveIntensity={1.4}
+            color="#67e8f9"
+            emissive="#00e5ff"
+            emissiveIntensity={2.0}
             metalness={0.95}
             roughness={0.05}
           />
@@ -128,9 +128,9 @@ export function HeroInteractive3D({ scrollProgress }: HeroInteractive3DProps) {
         <mesh ref={ring2Ref}>
           <torusGeometry args={[1.55, 0.014, 16, 120]} />
           <meshStandardMaterial
-            color="#38bdf8"
-            emissive="#0284c7"
-            emissiveIntensity={1.2}
+            color="#818cf8"
+            emissive="#6366f1"
+            emissiveIntensity={1.8}
             metalness={0.95}
             roughness={0.05}
           />
@@ -139,17 +139,17 @@ export function HeroInteractive3D({ scrollProgress }: HeroInteractive3DProps) {
         <mesh ref={ring3Ref}>
           <torusGeometry args={[1.78, 0.012, 16, 120]} />
           <meshStandardMaterial
-            color="#a7f3d0"
-            emissive="#059669"
-            emissiveIntensity={0.9}
+            color="#38bdf8"
+            emissive="#0284c7"
+            emissiveIntensity={1.4}
             metalness={0.95}
             roughness={0.05}
           />
         </mesh>
 
         {/* 5. Core Point Lights */}
-        <pointLight color="#34d399" intensity={4.5} distance={6} />
-        <pointLight color="#38bdf8" intensity={2.5} distance={4} position={[0, -1, 1]} />
+        <pointLight color="#00e5ff" intensity={6.0} distance={7} />
+        <pointLight color="#818cf8" intensity={3.5} distance={5} position={[0, -1, 1]} />
       </Float>
     </group>
   );

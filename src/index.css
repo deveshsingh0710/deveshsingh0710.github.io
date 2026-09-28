@@ -8,15 +8,16 @@
   
   html {
     scroll-behavior: smooth;
-    background-color: #020605;
+    background-color: #07090e;
   }
 
   body, #root {
     width: 100%;
     margin: 0;
     padding: 0;
-    background-color: #020605;
+    background-color: #07090e;
     font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+    color: #f8fafc;
   }
 }
 
@@ -25,27 +26,69 @@
   letter-spacing: -0.03em;
 }
 
-.font-serif-book {
-  font-family: 'Syne', system-ui, sans-serif;
-}
-
 .font-mono-code {
   font-family: 'JetBrains Mono', 'Fira Code', monospace;
 }
 
-/* Apple / Linear Style Dynamic Card Spotlight Glow */
+/* Ambient Cyber Grid (Gavinder Singh Style) */
+.ambient-grid {
+  position: fixed;
+  inset: 0;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Soft Ambient Luminous Orbs */
+.ambient-glow {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(130px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.glow-top-right {
+  width: 650px;
+  height: 650px;
+  top: -120px;
+  right: -100px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.18) 0%, rgba(99, 102, 241, 0.05) 50%, transparent 70%);
+}
+
+.glow-bottom-left {
+  width: 600px;
+  height: 600px;
+  bottom: 5%;
+  left: -120px;
+  background: radial-gradient(circle, rgba(6, 182, 212, 0.16) 0%, rgba(16, 185, 129, 0.06) 50%, transparent 70%);
+}
+
+.glow-center {
+  width: 700px;
+  height: 700px;
+  top: 40%;
+  left: 25%;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, transparent 70%);
+}
+
+/* Frosted Glass Spotlight Card */
 .spotlight-card {
   position: relative;
-  background: rgba(4, 15, 11, 0.7);
-  border: 1px solid rgba(16, 185, 129, 0.15);
-  backdrop-filter: blur(16px);
+  background: rgba(14, 20, 32, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border-radius: 1.25rem;
   overflow: hidden;
   transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .spotlight-card:hover {
-  border-color: rgba(52, 211, 153, 0.45);
-  box-shadow: 0 10px 40px -10px rgba(16, 185, 129, 0.15);
+  border-color: rgba(0, 229, 255, 0.45);
+  box-shadow: 0 12px 40px -10px rgba(6, 182, 212, 0.2);
 }
 
 .spotlight-card::before {
@@ -53,9 +96,9 @@
   position: absolute;
   inset: -1px;
   background: radial-gradient(
-    600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-    rgba(16, 185, 129, 0.15),
-    transparent 40%
+    500px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(6, 182, 212, 0.18),
+    transparent 45%
   );
   border-radius: inherit;
   pointer-events: none;
@@ -68,17 +111,17 @@
   opacity: 1;
 }
 
-/* Custom Emerald Minimalist Scrollbar */
+/* Custom Emerald/Cyan Minimalist Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #020605;
+  background: #07090e;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(16, 185, 129, 0.35);
+  background: rgba(6, 182, 212, 0.4);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(52, 211, 153, 0.7);
+  background: rgba(6, 182, 212, 0.8);
 }

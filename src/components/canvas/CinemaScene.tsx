@@ -37,15 +37,15 @@ function SceneWorld({ scrollProgress, hoveredProject }: CinemaSceneProps) {
 
       {/* 2. World Group that scrolls down through Projects */}
       <group ref={worldGroupRef} position={[0, 0, 0]}>
-        {/* Organic 3D Curved S-Spline Thread (Begins at Projects, zero visibility in Hero) */}
+        {/* Dynamic Liquid Fluid-Fill 3D Thread with project junction docking ports */}
         <CurvedThread3D scrollProgress={scrollProgress} />
 
         {/* Ambient Spatial Grids */}
-        <gridHelper args={[28, 56, '#064e3b', '#031710']} position={[0, -2.4, 0]} />
-        <gridHelper args={[28, 56, '#064e3b', '#031710']} position={[0, -7.2, 0]} />
+        <gridHelper args={[32, 64, '#06b6d4', '#1e293b']} position={[0, -2.4, 0]} />
+        <gridHelper args={[32, 64, '#06b6d4', '#1e293b']} position={[0, -7.2, 0]} />
       </group>
 
-      {/* 3. Magnetic Floating Hover Portal (Tracks cursor, only active on project hover!) */}
+      {/* 3. Magnetic Floating Hover Portal (Tracks cursor, only active on project name hover!) */}
       <FloatingHoverPortal hoveredProject={hoveredProject} />
     </>
   );
@@ -61,39 +61,39 @@ export function CinemaScene({ scrollProgress, hoveredProject }: CinemaSceneProps
           alpha: true,
           powerPreference: 'high-performance',
           toneMapping: THREE.ACESFilmicToneMapping,
-          toneMappingExposure: 1.25,
+          toneMappingExposure: 1.35,
         }}
         dpr={[1, 2]}
       >
-        <color attach="background" args={['#020605']} />
+        {/* Transparent background so CSS cosmic glowing orbs and cyber grid show through */}
 
         {/* Cinematic Studio Lighting */}
-        <ambientLight intensity={0.8} />
-        <directionalLight position={[6, 9, 6]} intensity={2.8} color="#ecfdf5" />
-        <directionalLight position={[-6, -4, -3]} intensity={2.0} color="#10b981" />
-        <directionalLight position={[0, -6, 5]} intensity={1.5} color="#06b6d4" />
+        <ambientLight intensity={1.2} />
+        <directionalLight position={[6, 9, 6]} intensity={3.5} color="#e0f2fe" />
+        <directionalLight position={[-6, -4, -3]} intensity={2.6} color="#00e5ff" />
+        <directionalLight position={[0, -6, 5]} intensity={2.0} color="#818cf8" />
 
         {/* Floating Atmospheric Cyber Sparkles */}
         <Sparkles
-          count={90}
-          scale={[18, 20, 16]}
-          size={1.6}
-          speed={0.25}
-          opacity={0.35}
-          color="#34d399"
+          count={100}
+          scale={[20, 22, 16]}
+          size={1.8}
+          speed={0.3}
+          opacity={0.45}
+          color="#00e5ff"
         />
 
         <SceneWorld scrollProgress={scrollProgress} hoveredProject={hoveredProject} />
 
-        {/* High-End Post-Processing: Soft Selective Bloom & Vignette */}
+        {/* High-End Post-Processing: Soft Selective Bloom & Subtle Vignette */}
         <EffectComposer multisampling={4}>
           <Bloom
-            luminanceThreshold={0.52}
-            luminanceSmoothing={0.75}
-            intensity={1.3}
+            luminanceThreshold={0.48}
+            luminanceSmoothing={0.8}
+            intensity={1.4}
             mipmapBlur
           />
-          <Vignette eskil={false} offset={0.12} darkness={0.85} />
+          <Vignette eskil={false} offset={0.08} darkness={0.65} />
         </EffectComposer>
       </Canvas>
     </div>
