@@ -17,20 +17,23 @@ export function PortfolioLayout({ scrollProgress, onScrollTo, onHoverProject }: 
   const [copiedCloneCmd, setCopiedCloneCmd] = useState(false);
 
   // Synchronized fluid progress
-  const fluidProgress = Math.min(Math.max((scrollProgress - 0.06) / 0.82, 0), 1);
+  const fluidProgress = Math.min(Math.max((scrollProgress - 0.05) / 0.75, 0), 1);
 
-  // Exact Checkpoint Windows:
-  // Dock 1 is at 0.24 -> Active window: 0.18 to 0.36
-  // Dock 2 is at 0.56 -> Active window: 0.50 to 0.68
-  // Dock 3 is at 0.85 -> Active window: 0.78 to 0.94
-  // Outside these windows, activeIndex is NULL (project card completely disappears / "hat jaye")
+  // Exact Checkpoint Windows for the 3 Projects:
+  // Dock 1: fluidProgress around 0.24 -> Active window: 0.18 to 0.35
+  // Dock 2: fluidProgress around 0.56 -> Active window: 0.48 to 0.65
+  // Dock 3: fluidProgress around 0.85 -> Active window: 0.74 to 0.88
+  // Outside these windows, activeIndex is NULL (card completely vanishes / "hat jaye")
+  // Past scrollProgress >= 0.78, projects phase is COMPLETELY finished so it NEVER overlaps About/Contact!
   let activeIndex: number | null = null;
-  if (fluidProgress >= 0.18 && fluidProgress <= 0.36) {
-    activeIndex = 0; // Project 1: Quantum Tunneling
-  } else if (fluidProgress >= 0.50 && fluidProgress <= 0.68) {
-    activeIndex = 1; // Project 2: LabelChecker AI
-  } else if (fluidProgress >= 0.78 && fluidProgress <= 0.94) {
-    activeIndex = 2; // Project 3: Healthcare Telemetry
+  if (scrollProgress < 0.76) {
+    if (fluidProgress >= 0.18 && fluidProgress <= 0.35) {
+      activeIndex = 0; // Project 1: Quantum Tunneling
+    } else if (fluidProgress >= 0.48 && fluidProgress <= 0.65) {
+      activeIndex = 1; // Project 2: LabelChecker AI
+    } else if (fluidProgress >= 0.74 && fluidProgress <= 0.88) {
+      activeIndex = 2; // Project 3: Healthcare Telemetry
+    }
   }
 
   const toggleSound = () => {
@@ -132,7 +135,7 @@ export function PortfolioLayout({ scrollProgress, onScrollTo, onHoverProject }: 
       {/* ========================================================
           HERO SECTION
       ======================================================== */}
-      <section id="hero" className="min-h-[90vh] flex items-center px-6 md:px-16 pt-24 pb-12">
+      <section id="hero" className="min-h-[88vh] flex items-center px-6 md:px-14 pt-24 pb-12">
         <div className="w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           {/* Left Hero Details */}
           <div className="lg:col-span-7 space-y-6">
@@ -183,13 +186,13 @@ export function PortfolioLayout({ scrollProgress, onScrollTo, onHoverProject }: 
       </section>
 
       {/* ========================================================
-          PROJECTS SCROLL TRACK (Virtual scroll runway)
-          Provides clean scroll distance for the fluid thread to advance.
+          PROJECTS SCROLL RUNWAY
+          Spacious height so fluid smoothly scrubs across the 3 checkpoints.
       ======================================================== */}
-      <section id="projects-scroll-track" className="relative min-h-[190vh]">
-        {/* Real-time Telemetry HUD (Fixed top indicator during pipeline scrub) */}
-        {scrollProgress > 0.08 && scrollProgress < 0.88 && (
-          <div className="fixed top-20 left-6 md:left-14 z-30 flex items-center space-x-3 text-[11px] font-mono-code bg-slate-950/80 px-3.5 py-1.5 rounded-xl border border-cyan-500/30 backdrop-blur-xl">
+      <section id="projects-scroll-track" className="relative min-h-[220vh]">
+        {/* Real-time Telemetry HUD (Fixed top indicator while scrubbing projects) */}
+        {scrollProgress > 0.08 && scrollProgress < 0.76 && (
+          <div className="fixed top-20 left-6 md:left-14 z-30 flex items-center space-x-3 text-[11px] font-mono-code bg-slate-950/85 px-3.5 py-1.5 rounded-xl border border-cyan-500/30 backdrop-blur-xl shadow-lg">
             <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
             <span className="text-slate-400">FLUID PIPELINE:</span>
             <span className="text-cyan-300 font-bold">{(fluidProgress * 100).toFixed(0)}%</span>
@@ -202,14 +205,14 @@ export function PortfolioLayout({ scrollProgress, onScrollTo, onHoverProject }: 
 
         {/* ========================================================
             FIXED FLOATING HUD PROJECT CARD (CENTER-LEFT)
-            - Locked in viewport: NEVER gets cut off or scrolls off!
-            - Ultra-compact footprint (max-w-[410px])
-            - APPEARS ONLY WHEN FLUID REACHES THE CHECKPOINT!
-            - DISAPPEARS ("HAT JAYE") WHEN SCROLLING AWAY!
+            - Locked in viewport: NEVER gets cut off!
+            - Ultra-compact footprint (max-w-[400px])
+            - APPEARS ONLY AT CHECKPOINTS!
+            - DISAPPEARS IN-BETWEEN AND BEFORE ABOUT SECTION!
         ======================================================== */}
-        {scrollProgress < 0.88 && (
+        {scrollProgress < 0.76 && (
           <div
-            className={`fixed left-6 md:left-14 top-1/2 -translate-y-1/2 z-30 w-full max-w-[410px] transition-all duration-300 ${
+            className={`fixed left-6 md:left-14 top-1/2 -translate-y-1/2 z-30 w-full max-w-[400px] transition-all duration-300 ${
               activeProject !== null
                 ? 'opacity-100 scale-100 pointer-events-auto translate-y-0'
                 : 'opacity-0 scale-95 pointer-events-none translate-y-4'
@@ -218,10 +221,10 @@ export function PortfolioLayout({ scrollProgress, onScrollTo, onHoverProject }: 
             {activeProject && (
               <div
                 onMouseMove={handleCardMouseMove}
-                className="spotlight-card w-full p-5 sm:p-6 shadow-2xl border border-cyan-500/30 bg-slate-900/85 backdrop-blur-2xl rounded-2xl space-y-3.5"
+                className="spotlight-card w-full p-4 sm:p-5 shadow-2xl border border-cyan-500/30 bg-slate-900/90 backdrop-blur-2xl rounded-2xl space-y-3"
               >
                 {/* Header Row */}
-                <div className="border-b border-slate-800/80 pb-3">
+                <div className="border-b border-slate-800/80 pb-2.5">
                   <div className="flex items-center justify-between gap-2 mb-1">
                     <span className="text-[10px] font-mono-code text-cyan-400 font-bold uppercase tracking-wider">
                       ◈ CHECKPOINT 0{(activeIndex ?? 0) + 1} // {activeProject.category}
@@ -239,7 +242,7 @@ export function PortfolioLayout({ scrollProgress, onScrollTo, onHoverProject }: 
                         onHoverProject(activeProject.id === 'quantum-tunneling' ? 'quantum' : activeProject.id === 'labelchecker' ? 'vision' : 'healthcare');
                       }}
                       onMouseLeave={() => onHoverProject(null)}
-                      className="text-lg sm:text-xl font-black font-display text-slate-100 hover:text-cyan-300 transition-colors cursor-pointer inline-flex items-center gap-2"
+                      className="text-lg font-black font-display text-slate-100 hover:text-cyan-300 transition-colors cursor-pointer inline-flex items-center gap-1.5"
                     >
                       <span>{activeProject.title}</span>
                       <span className="text-[9px] font-mono-code px-1.5 py-0.5 rounded bg-cyan-400/20 text-cyan-300 border border-cyan-400/30">
@@ -263,7 +266,7 @@ export function PortfolioLayout({ scrollProgress, onScrollTo, onHoverProject }: 
                 </p>
 
                 {/* Compact Architecture Pipeline */}
-                <div className="p-2.5 rounded-lg bg-slate-950/80 border border-slate-800/80 text-[10px] font-mono-code">
+                <div className="p-2 rounded-lg bg-slate-950/80 border border-slate-800/80 text-[10px] font-mono-code">
                   <span className="text-slate-400 block mb-1 uppercase tracking-wider text-[9px]">
                     Pipeline Flow:
                   </span>
@@ -305,132 +308,136 @@ export function PortfolioLayout({ scrollProgress, onScrollTo, onHoverProject }: 
       </section>
 
       {/* ========================================================
-          ABOUT SECTION
+          ABOUT & CONTACT DESTINATION (Aligned neatly on the Left)
+          - Left-aligned (md:ml-14) matching the project card column!
+          - Compact width (max-w-xl) so right side fluid thread remains 100% visible!
+          - ZERO collision with project cards!
       ======================================================== */}
-      <section id="about" className="px-6 md:px-16 py-20 max-w-4xl mx-auto">
-        <div className="spotlight-card p-6 md:p-8 rounded-2xl shadow-xl space-y-6">
-          <div className="border-b border-slate-800/80 pb-4">
-            <span className="text-xs font-mono-code text-cyan-400 uppercase tracking-widest">
-              02 // ENGINEERING PHILOSOPHY & TOOLCHAIN
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-slate-100 mt-1">
-              Precision Over Hype.
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-300 font-mono-code leading-relaxed mt-2">
-              {DEVELOPER_BIO.bio}
-            </p>
-          </div>
-
-          {/* Clustered Skills Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-            {DEVELOPER_BIO.skillClusters.map((cluster, cIdx) => (
-              <div key={cIdx} className="p-3.5 rounded-xl bg-slate-900/70 border border-slate-700/60 space-y-2">
-                <span className="text-[11px] uppercase font-mono-code font-bold tracking-wider text-cyan-400 flex items-center space-x-1.5">
-                  <Cpu className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>{cluster.category}</span>
-                </span>
-                <div className="flex flex-wrap gap-1.5">
-                  {cluster.skills.map((skill, sIdx) => {
-                    const isSelected = selectedSkill === skill;
-                    return (
-                      <button
-                        key={sIdx}
-                        onClick={() => {
-                          sounds.playClick();
-                          setSelectedSkill(isSelected ? null : skill);
-                        }}
-                        className={`px-2 py-0.5 text-[10px] font-mono-code rounded border transition-all cursor-pointer ${
-                          isSelected
-                            ? 'bg-cyan-500 text-slate-950 border-cyan-400 font-bold shadow-md shadow-cyan-500/30'
-                            : 'bg-slate-900 border-slate-700/80 text-slate-300 hover:border-cyan-500/50 hover:text-cyan-300'
-                        }`}
-                      >
-                        {skill}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ========================================================
-          CONTACT SECTION
-      ======================================================== */}
-      <section id="contact" className="px-6 md:px-16 py-16 max-w-xl mx-auto">
-        <div className="spotlight-card p-6 md:p-8 rounded-2xl shadow-xl space-y-5">
-          <div>
-            <span className="text-xs font-mono-code text-cyan-400 uppercase tracking-widest">
-              03 // DIRECT TRANSMISSION
-            </span>
-            <h2 className="text-2xl sm:text-4xl font-black font-display text-slate-100 mt-1">
-              Let's Build.
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-300 font-mono-code leading-relaxed mt-2">
-              Looking for a Machine Learning Engineer to design resilient deep learning models, high-performance vision pipelines, or distributed systems? Connect directly below.
-            </p>
-          </div>
-
-          {/* Quick CLI Terminal Clone Command */}
-          <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-700/70 flex items-center justify-between font-mono-code text-xs">
-            <div className="flex items-center space-x-2 text-slate-200 overflow-x-auto">
-              <span className="text-cyan-400 font-bold">$</span>
-              <span>git clone https://github.com/deveshsingh0710.git</span>
+      <div className="relative z-20 px-6 md:px-14 pb-24 space-y-14 max-w-xl">
+        {/* About Section */}
+        <section id="about" className="pt-6">
+          <div className="spotlight-card p-5 sm:p-6 rounded-2xl shadow-xl space-y-4">
+            <div className="border-b border-slate-800/80 pb-3">
+              <span className="text-[10px] font-mono-code text-cyan-400 uppercase tracking-widest block">
+                02 // ENGINEERING PHILOSOPHY & TOOLCHAIN
+              </span>
+              <h2 className="text-xl sm:text-2xl font-extrabold font-display text-slate-100 mt-1">
+                Precision Over Hype.
+              </h2>
+              <p className="text-xs text-slate-300 font-mono-code leading-relaxed mt-2">
+                {DEVELOPER_BIO.bio}
+              </p>
             </div>
-            <button
-              onClick={handleCopyClone}
-              className="ml-3 px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-[10px] shrink-0 flex items-center space-x-1 cursor-pointer"
-            >
-              {copiedCloneCmd ? <Check className="w-3 h-3 text-cyan-400" /> : <Copy className="w-3 h-3" />}
-              <span>{copiedCloneCmd ? 'Copied' : 'Copy'}</span>
-            </button>
-          </div>
 
-          <div className="space-y-2">
-            <a
-              href={DEVELOPER_BIO.links.github}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-between p-3 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700/60 transition-all text-xs font-mono-code group"
-            >
-              <div className="flex items-center space-x-3">
-                <GithubIcon className="w-4 h-4 text-cyan-400" />
-                <span>GitHub Repositories & Open Source</span>
-              </div>
-              <span className="text-slate-400 group-hover:text-cyan-400 flex items-center space-x-1">
-                <span>@deveshsingh0710</span>
-                <ArrowUpRight className="w-3.5 h-3.5" />
+            {/* Compact Clustered Skills Grid */}
+            <div className="space-y-3">
+              {DEVELOPER_BIO.skillClusters.map((cluster, cIdx) => (
+                <div key={cIdx} className="space-y-1.5">
+                  <span className="text-[10px] uppercase font-mono-code font-bold tracking-wider text-cyan-400 flex items-center space-x-1">
+                    <Cpu className="w-3 h-3 text-cyan-400" />
+                    <span>{cluster.category}</span>
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {cluster.skills.map((skill, sIdx) => {
+                      const isSelected = selectedSkill === skill;
+                      return (
+                        <button
+                          key={sIdx}
+                          onClick={() => {
+                            sounds.playClick();
+                            setSelectedSkill(isSelected ? null : skill);
+                          }}
+                          className={`px-2 py-0.5 text-[10px] font-mono-code rounded border transition-all cursor-pointer ${
+                            isSelected
+                              ? 'bg-cyan-500 text-slate-950 border-cyan-400 font-bold shadow-md shadow-cyan-500/30'
+                              : 'bg-slate-900 border-slate-700/80 text-slate-300 hover:border-cyan-500/50 hover:text-cyan-300'
+                          }`}
+                        >
+                          {skill}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Contact Section */}
+        <section id="contact">
+          <div className="spotlight-card p-5 sm:p-6 rounded-2xl shadow-xl space-y-4">
+            <div>
+              <span className="text-[10px] font-mono-code text-cyan-400 uppercase tracking-widest block">
+                03 // DIRECT TRANSMISSION
               </span>
-            </a>
+              <h2 className="text-xl sm:text-3xl font-black font-display text-slate-100 mt-1">
+                Let's Build.
+              </h2>
+              <p className="text-xs text-slate-300 font-mono-code leading-relaxed mt-1.5">
+                Looking for a Machine Learning Engineer to design resilient deep learning models, high-performance vision pipelines, or distributed systems? Connect directly below.
+              </p>
+            </div>
 
-            <a
-              href={DEVELOPER_BIO.links.email}
-              className="flex items-center justify-between p-3 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700/60 transition-all text-xs font-mono-code group"
-            >
-              <div className="flex items-center space-x-3">
-                <Send className="w-4 h-4 text-cyan-400" />
-                <span>Encrypted Email Transmission</span>
+            {/* Compact CLI Terminal Clone Command */}
+            <div className="p-2.5 rounded-xl bg-slate-900/90 border border-slate-700/70 flex items-center justify-between font-mono-code text-xs">
+              <div className="flex items-center space-x-2 text-slate-200 overflow-x-auto text-[11px]">
+                <span className="text-cyan-400 font-bold">$</span>
+                <span>git clone https://github.com/deveshsingh0710.git</span>
               </div>
-              <span className="text-slate-400 group-hover:text-cyan-400 flex items-center space-x-1">
-                <span>Send Direct Inquiry</span>
-                <ArrowUpRight className="w-3.5 h-3.5" />
-              </span>
-            </a>
-          </div>
+              <button
+                onClick={handleCopyClone}
+                className="ml-2 px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-[10px] shrink-0 flex items-center space-x-1 cursor-pointer"
+              >
+                {copiedCloneCmd ? <Check className="w-3 h-3 text-cyan-400" /> : <Copy className="w-3 h-3" />}
+                <span>{copiedCloneCmd ? 'Copied' : 'Copy'}</span>
+              </button>
+            </div>
 
-          <div className="pt-2 flex items-center justify-center">
-            <button
-              onClick={handleCelebrate}
-              className="flex items-center space-x-2 px-5 py-2 rounded-full bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 text-xs font-mono-code transition-all cursor-pointer shadow-lg shadow-cyan-500/10 hover:scale-105"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-spin" style={{ animationDuration: '8s' }} />
-              <span>Stamp Verification Seal (Celebrate)</span>
-            </button>
+            <div className="space-y-2">
+              <a
+                href={DEVELOPER_BIO.links.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between p-3 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700/60 transition-all text-xs font-mono-code group"
+              >
+                <div className="flex items-center space-x-2.5">
+                  <GithubIcon className="w-4 h-4 text-cyan-400" />
+                  <span>GitHub Repositories & Open Source</span>
+                </div>
+                <span className="text-slate-400 group-hover:text-cyan-400 flex items-center space-x-1">
+                  <span>@deveshsingh0710</span>
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                </span>
+              </a>
+
+              <a
+                href={DEVELOPER_BIO.links.email}
+                className="flex items-center justify-between p-3 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700/60 transition-all text-xs font-mono-code group"
+              >
+                <div className="flex items-center space-x-2.5">
+                  <Send className="w-4 h-4 text-cyan-400" />
+                  <span>Encrypted Email Transmission</span>
+                </div>
+                <span className="text-slate-400 group-hover:text-cyan-400 flex items-center space-x-1">
+                  <span>Send Direct Inquiry</span>
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                </span>
+              </a>
+            </div>
+
+            <div className="pt-1 flex items-center justify-center">
+              <button
+                onClick={handleCelebrate}
+                className="flex items-center space-x-2 px-5 py-2 rounded-full bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 text-xs font-mono-code transition-all cursor-pointer shadow-lg shadow-cyan-500/10 hover:scale-105"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-spin" style={{ animationDuration: '8s' }} />
+                <span>Stamp Verification Seal (Celebrate)</span>
+              </button>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
 
       {/* Footer */}
       <footer className="py-6 px-6 text-center text-xs font-mono-code text-slate-500 border-t border-slate-800/60 bg-slate-950/80">
