@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 
-export type SectionId = 'hero' | 'about' | 'projects' | 'skills' | 'contact';
+export type SectionId = 'frames' | 'hero' | 'about' | 'projects' | 'skills' | 'contact';
 
 export function useSmoothScroll() {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [projectsProgress, setProjectsProgress] = useState(0);
   const [isInsideProjects, setIsInsideProjects] = useState(false);
-  const [activeSection, setActiveSection] = useState<SectionId>('hero');
+  const [activeSection, setActiveSection] = useState<SectionId>('frames');
 
   const targetProgress = useRef(0);
   const currentProgress = useRef(0);
@@ -50,6 +50,7 @@ export function useSmoothScroll() {
       }
 
       // Detect active section for ScrollSpy navbar
+      const heroEl = document.getElementById('hero');
       const aboutEl = document.getElementById('about');
       const skillsEl = document.getElementById('skills');
       const contactEl = document.getElementById('contact');
@@ -62,8 +63,10 @@ export function useSmoothScroll() {
         setActiveSection('projects');
       } else if (aboutEl && scrollY >= aboutEl.offsetTop - 260) {
         setActiveSection('about');
-      } else {
+      } else if (heroEl && scrollY >= heroEl.offsetTop - 260) {
         setActiveSection('hero');
+      } else {
+        setActiveSection('frames');
       }
 
       if (!isAnimating.current) {
@@ -86,8 +89,18 @@ export function useSmoothScroll() {
   }, []);
 
   const scrollToSection = (sectionId: string) => {
-    if (sectionId === 'hero' || sectionId === 'home') {
+    if (sectionId === 'frames') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    if (sectionId === 'hero' || sectionId === 'home') {
+      const heroEl = document.getElementById('hero');
+      if (heroEl) {
+        heroEl.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
       return;
     }
 

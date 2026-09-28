@@ -10,6 +10,7 @@ import { PROJECTS, DEVELOPER_BIO } from '../../data/projectsData';
 import { sounds } from '../../utils/audio';
 import { getActiveCheckpoint } from '../../utils/fluidSync';
 import type { SectionId } from '../../hooks/useSmoothScroll';
+import { CursorMotionFrames } from './CursorMotionFrames';
 
 interface PortfolioLayoutProps {
   scrollProgress: number;
@@ -189,6 +190,9 @@ export function PortfolioLayout({
 
         {/* ScrollSpy Navigation Links */}
         <nav className="hidden md:flex items-center space-x-1 bg-slate-900/70 p-1 rounded-full border border-white/[0.06]">
+          <button onClick={() => onScrollTo('frames')} className={getNavLinkClass('frames')}>
+            Frames
+          </button>
           <button onClick={() => onScrollTo('hero')} className={getNavLinkClass('hero')}>
             Home
           </button>
@@ -228,9 +232,16 @@ export function PortfolioLayout({
       </header>
 
       {/* ========================================================
+          00 // OPENING KINETIC MOTION FRAMES (Cursor-Driven)
+          - Renders at the very beginning of the site!
+          - Follows user cursor in real-time with 3D tilt & frame scrubbing!
+      ======================================================== */}
+      <CursorMotionFrames />
+
+      {/* ========================================================
           01 // HERO SECTION (Strictly aligned to max-w-6xl)
       ======================================================== */}
-      <section id="hero" className="min-h-screen flex items-center px-6 md:px-12 pt-24 pb-16">
+      <section id="hero" className="min-h-screen flex items-center px-6 md:px-12 pt-20 pb-16">
         <div className="w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
           {/* Left Hero Details */}
           <div className="lg:col-span-7 space-y-6">
