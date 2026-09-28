@@ -6,16 +6,31 @@ import { PROJECTS, DEVELOPER_BIO } from '../../data/projectsData';
 import { sounds } from '../../utils/audio';
 
 interface PortfolioLayoutProps {
+  scrollProgress: number;
   onScrollTo: (id: string) => void;
   onHoverProject: (project: 'quantum' | 'vision' | 'healthcare' | null) => void;
 }
 
-export function PortfolioLayout({ onScrollTo, onHoverProject }: PortfolioLayoutProps) {
+export function PortfolioLayout({ scrollProgress, onScrollTo, onHoverProject }: PortfolioLayoutProps) {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [expandedCodeIndex, setExpandedCodeIndex] = useState<number | null>(null);
   const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
   const [isMuted, setIsMuted] = useState(false);
   const [copiedCloneCmd, setCopiedCloneCmd] = useState(false);
+
+  // Fluid progress calculation synchronized with CurvedThread3D
+  const fluidProgress = Math.min(Math.max((scrollProgress - 0.06) / 0.84, 0), 1);
+
+  // Discrete project activation when fluid reaches specific dock thresholds on the thread
+  // Dock 1: 0.18, Dock 2: 0.48, Dock 3: 0.74
+  let activeIndex: number | null = null;
+  if (fluidProgress >= 0.18 && fluidProgress < 0.48) {
+    activeIndex = 0; // Quantum Tunneling
+  } else if (fluidProgress >= 0.48 && fluidProgress < 0.74) {
+    activeIndex = 1; // LabelChecker AI
+  } else if (fluidProgress >= 0.74) {
+    activeIndex = 2; // Healthcare Telemetry Engine
+  }
 
   const toggleSound = () => {
     sounds.enabled = !sounds.enabled;
@@ -106,6 +121,8 @@ export function PortfolioLayout({ onScrollTo, onHoverProject }: PortfolioLayoutP
       </svg>
     );
   };
+
+  const activeProject = activeIndex !== null ? PROJECTS[activeIndex] : null;
 
   return (
     <div className="relative z-10 w-full text-slate-100 pointer-events-auto">
@@ -211,7 +228,7 @@ export function PortfolioLayout({ onScrollTo, onHoverProject }: PortfolioLayoutP
 
               <span className="text-xs font-mono-code text-slate-400 flex items-center space-x-2">
                 <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-                <span>Scroll down to see the liquid fluid conduit fill in real-time</span>
+                <span>Scroll down: projects appear ONLY when fluid reaches their dock</span>
               </span>
             </div>
           </div>
@@ -222,401 +239,177 @@ export function PortfolioLayout({ onScrollTo, onHoverProject }: PortfolioLayoutP
       </section>
 
       {/* ========================================================
-          PROJECTS SECTION (Compact Bracket / Width, Left-Aligned)
-          Right side remains open for the 3D Liquid Fluid Thread!
+          PROJECTS SECTION (Sticky Scrollytelling Stage)
+          PROJECT REVEAL: Cards do NOT clutter the screen.
+          ONLY ONE project card appears at a time when the fluid reaches its docking limit!
       ======================================================== */}
-      <section id="projects" className="px-6 md:px-16 py-16 max-w-6xl mx-auto">
-        <div className="border-b border-slate-800/80 pb-4 mb-10 flex flex-col sm:flex-row sm:items-end justify-between gap-2">
-          <div>
-            <span className="text-xs font-mono-code text-cyan-400 uppercase tracking-widest">
-              01 // PRODUCTION ARCHITECTURES
-            </span>
-            <h2 className="text-2xl sm:text-4xl font-extrabold font-display text-slate-100 mt-1">
-              Selected Systems.
-            </h2>
+      <section id="projects" className="relative min-h-[250vh] px-6 md:px-16 max-w-6xl mx-auto">
+        <div className="sticky top-24 w-full">
+          {/* Section Header with Real-Time Fluid Pipeline Telemetry */}
+          <div className="border-b border-slate-800/80 pb-4 mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+            <div>
+              <span className="text-xs font-mono-code text-cyan-400 uppercase tracking-widest">
+                01 // PRODUCTION ARCHITECTURES
+              </span>
+              <h2 className="text-2xl sm:text-4xl font-extrabold font-display text-slate-100 mt-1">
+                Active Architecture.
+              </h2>
+            </div>
+            
+            {/* Live Fluid Telemetry Meter */}
+            <div className="flex items-center space-x-3 text-xs font-mono-code bg-slate-900/80 px-3.5 py-1.5 rounded-xl border border-cyan-500/30 backdrop-blur-md">
+              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+              <span className="text-slate-400">FLUID PIPELINE:</span>
+              <span className="text-cyan-300 font-bold">{(fluidProgress * 100).toFixed(0)}%</span>
+              <span className="text-slate-500">|</span>
+              <span className="text-emerald-400">
+                {activeIndex !== null ? `DOCK 0${activeIndex + 1} ENGAGED` : 'FILLING CONDUIT...'}
+              </span>
+            </div>
           </div>
-          <div className="flex items-center space-x-2 text-xs font-mono-code text-cyan-300 bg-cyan-500/10 px-3 py-1.5 rounded-lg border border-cyan-500/20">
-            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
-            <span>Hover project title for 3D simulation</span>
+
+          {/* STAGE CONTAINER: Only ONE project appears at a time! */}
+          <div className="max-w-xl lg:max-w-2xl min-h-[440px] flex items-center">
+            {activeProject === null ? (
+              /* Awaiting Fluid Fill State (Before reaching Dock 1) */
+              <div className="w-full p-8 rounded-2xl border border-cyan-500/20 bg-slate-900/40 backdrop-blur-md text-center space-y-3 animate-pulse">
+                <span className="text-xs font-mono-code text-cyan-400 uppercase tracking-widest block">
+                  ◈ FLUID CONDUIT INITIALIZING ◈
+                </span>
+                <p className="text-sm font-mono-code text-slate-300">
+                  Scroll down to advance the neon fluid along the 3D pipeline.
+                </p>
+                <span className="inline-flex items-center space-x-1.5 text-xs font-mono-code text-cyan-300">
+                  <span>Fluid at {(fluidProgress * 100).toFixed(0)}%</span>
+                  <span>→ Reaching Dock 01 at 18%</span>
+                </span>
+              </div>
+            ) : (
+              /* ACTIVE PROJECT CARD: Revealed when fluid reaches this project's limit */
+              <div
+                key={activeProject.id}
+                onMouseMove={handleCardMouseMove}
+                className="spotlight-card w-full group relative p-6 md:p-8 shadow-2xl transition-all duration-300 transform scale-100 opacity-100"
+              >
+                <div className="relative z-10 space-y-4">
+                  {/* Header Row */}
+                  <div className="border-b border-slate-800/80 pb-3">
+                    <div className="flex items-center justify-between gap-2 mb-1.5">
+                      <span className="text-[11px] font-mono-code text-cyan-400 font-bold">
+                        0{(activeIndex ?? 0) + 1} // {activeProject.category.toUpperCase()}
+                      </span>
+                      <span className="text-[10px] font-mono-code px-2 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300">
+                        {activeProject.benchmarkBadge}
+                      </span>
+                    </div>
+
+                    {/* PROJECT TITLE: 3D Visual ONLY triggers when hovering this title! */}
+                    <div className="flex items-center justify-between gap-2">
+                      <h3
+                        onMouseEnter={() => {
+                          sounds.playClick();
+                          onHoverProject(activeProject.id === 'quantum-tunneling' ? 'quantum' : activeProject.id === 'labelchecker' ? 'vision' : 'healthcare');
+                        }}
+                        onMouseLeave={() => onHoverProject(null)}
+                        className="text-xl sm:text-2xl font-black font-display text-slate-100 hover:text-cyan-300 transition-colors cursor-pointer inline-flex items-center gap-2 group-title"
+                      >
+                        <span>{activeProject.title}</span>
+                        <span className="text-[10px] font-mono-code px-1.5 py-0.5 rounded bg-cyan-400/20 text-cyan-300 border border-cyan-400/30">
+                          3D SIM ↗
+                        </span>
+                      </h3>
+
+                      <button
+                        onClick={() => openLink(activeProject.githubUrl)}
+                        className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-slate-900/90 hover:bg-cyan-500 hover:text-slate-950 border border-slate-700/60 text-xs font-mono-code text-slate-300 transition-all cursor-pointer shrink-0"
+                      >
+                        <span>GitHub</span>
+                        <ArrowUpRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-mono-code">
+                    {activeProject.description}
+                  </p>
+
+                  {/* Visual Architecture Pipeline Flow */}
+                  <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800/80">
+                    <span className="text-[10px] font-mono-code text-slate-400 uppercase tracking-wider block mb-1.5">
+                      System Architecture Flow:
+                    </span>
+                    <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-mono-code">
+                      {activeProject.architecturePipeline.map((step, idx) => (
+                        <div key={idx} className="flex items-center space-x-1.5">
+                          <span className="px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-200">
+                            {step}
+                          </span>
+                          {idx < activeProject.architecturePipeline.length - 1 && (
+                            <span className="text-cyan-400 font-bold">➔</span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Compact Specs Row with Mini Loss Sparkline */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-850">
+                    <div className="flex flex-wrap gap-2">
+                      {activeProject.stats.map((s, i) => (
+                        <div key={i} className="px-2.5 py-1 rounded-lg bg-slate-900/90 border border-slate-800 text-[11px] font-mono-code">
+                          <span className="text-slate-400 mr-1">{s.label}:</span>
+                          <span className="font-semibold text-cyan-400">{s.value}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      {renderSparkline(activeProject.sparklineData, '#00e5ff')}
+                    </div>
+                  </div>
+
+                  {/* Collapsible Kernel Code */}
+                  <div className="flex items-center justify-between pt-1">
+                    <div className="flex flex-wrap gap-1.5">
+                      {activeProject.techStack.map((tech, idx) => (
+                        <span key={idx} className="px-2 py-0.5 text-[10px] font-mono-code rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+
+                    <button
+                      onClick={(e) => toggleCodeExpand(activeIndex ?? 0, e)}
+                      className="flex items-center space-x-1 text-[11px] font-mono-code text-slate-400 hover:text-cyan-300 transition-colors cursor-pointer"
+                    >
+                      <Terminal className="w-3 h-3 text-cyan-400" />
+                      <span>{expandedCodeIndex === activeIndex ? 'Hide' : 'Kernel'}</span>
+                      {expandedCodeIndex === activeIndex ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                    </button>
+                  </div>
+
+                  {expandedCodeIndex === activeIndex && (
+                    <div className="rounded-xl bg-slate-950 border border-slate-800 overflow-hidden font-mono-code text-[11px]">
+                      <div className="flex items-center justify-between px-3 py-1.5 bg-slate-900/80 border-b border-slate-800 text-slate-400">
+                        <span>Computational Architecture Kernel</span>
+                        <button
+                          onClick={(e) => handleCopy(activeProject.codeSnippet, activeIndex ?? 0, e)}
+                          className="flex items-center space-x-1 text-xs hover:text-slate-200 cursor-pointer"
+                        >
+                          {copiedIndex === activeIndex ? <Check className="w-3 h-3 text-cyan-400" /> : <Copy className="w-3 h-3" />}
+                          <span>{copiedIndex === activeIndex ? 'Copied' : 'Copy'}</span>
+                        </button>
+                      </div>
+                      <pre className="p-3 text-slate-300 overflow-x-auto text-[11px] leading-relaxed">
+                        <code>{activeProject.codeSnippet}</code>
+                      </pre>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
-        </div>
-
-        {/* Vertical Stack: Compact Cards aligned to the left, thread visible on right */}
-        <div className="space-y-12 max-w-xl lg:max-w-2xl">
-          {/* Project 1: Quantum Tunneling */}
-          {PROJECTS[0] && (
-            <div
-              onMouseMove={handleCardMouseMove}
-              className="spotlight-card group relative p-6 md:p-7 shadow-xl"
-            >
-              <div className="relative z-10 space-y-4">
-                {/* Header Row */}
-                <div className="border-b border-slate-800/80 pb-3">
-                  <div className="flex items-center justify-between gap-2 mb-1.5">
-                    <span className="text-[11px] font-mono-code text-cyan-400">
-                      01 // {PROJECTS[0].category.toUpperCase()}
-                    </span>
-                    <span className="text-[10px] font-mono-code px-2 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300">
-                      {PROJECTS[0].benchmarkBadge}
-                    </span>
-                  </div>
-
-                  {/* PROJECT TITLE: 3D Visual ONLY triggers when hovering this title! */}
-                  <div className="flex items-center justify-between gap-2">
-                    <h3
-                      onMouseEnter={() => {
-                        sounds.playClick();
-                        onHoverProject('quantum');
-                      }}
-                      onMouseLeave={() => onHoverProject(null)}
-                      className="text-xl sm:text-2xl font-black font-display text-slate-100 hover:text-cyan-300 transition-colors cursor-pointer inline-flex items-center gap-2 group-title"
-                    >
-                      <span>{PROJECTS[0].title}</span>
-                      <span className="text-[10px] font-mono-code px-1.5 py-0.5 rounded bg-cyan-400/20 text-cyan-300 border border-cyan-400/30">
-                        3D SIM ↗
-                      </span>
-                    </h3>
-
-                    <button
-                      onClick={() => openLink(PROJECTS[0].githubUrl)}
-                      className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-slate-900/90 hover:bg-cyan-500 hover:text-slate-950 border border-slate-700/60 text-xs font-mono-code text-slate-300 transition-all cursor-pointer shrink-0"
-                    >
-                      <span>GitHub</span>
-                      <ArrowUpRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Description */}
-                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-mono-code">
-                  {PROJECTS[0].description}
-                </p>
-
-                {/* Visual Architecture Pipeline Flow */}
-                <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800/80">
-                  <span className="text-[10px] font-mono-code text-slate-400 uppercase tracking-wider block mb-1.5">
-                    Pipeline Architecture:
-                  </span>
-                  <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-mono-code">
-                    {PROJECTS[0].architecturePipeline.map((step, idx) => (
-                      <div key={idx} className="flex items-center space-x-1.5">
-                        <span className="px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-200">
-                          {step}
-                        </span>
-                        {idx < PROJECTS[0].architecturePipeline.length - 1 && (
-                          <span className="text-cyan-400 font-bold">➔</span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Compact Specs Row with Mini Loss Sparkline */}
-                <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-850">
-                  <div className="flex flex-wrap gap-2">
-                    {PROJECTS[0].stats.map((s, i) => (
-                      <div key={i} className="px-2.5 py-1 rounded-lg bg-slate-900/90 border border-slate-800 text-[11px] font-mono-code">
-                        <span className="text-slate-400 mr-1">{s.label}:</span>
-                        <span className="font-semibold text-cyan-400">{s.value}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    {renderSparkline(PROJECTS[0].sparklineData, '#00e5ff')}
-                  </div>
-                </div>
-
-                {/* Collapsible Kernel Code */}
-                <div className="flex items-center justify-between pt-1">
-                  <div className="flex flex-wrap gap-1.5">
-                    {PROJECTS[0].techStack.map((tech, idx) => (
-                      <span key={idx} className="px-2 py-0.5 text-[10px] font-mono-code rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
-                        {tech}
-                      </span>
-                    ))}
-                  </div>
-
-                  <button
-                    onClick={(e) => toggleCodeExpand(0, e)}
-                    className="flex items-center space-x-1 text-[11px] font-mono-code text-slate-400 hover:text-cyan-300 transition-colors cursor-pointer"
-                  >
-                    <Terminal className="w-3 h-3 text-cyan-400" />
-                    <span>{expandedCodeIndex === 0 ? 'Hide' : 'Kernel'}</span>
-                    {expandedCodeIndex === 0 ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-                  </button>
-                </div>
-
-                {expandedCodeIndex === 0 && (
-                  <div className="rounded-xl bg-slate-950 border border-slate-800 overflow-hidden font-mono-code text-[11px]">
-                    <div className="flex items-center justify-between px-3 py-1.5 bg-slate-900/80 border-b border-slate-800 text-slate-400">
-                      <span>Schrödinger Dispersion Kernel</span>
-                      <button
-                        onClick={(e) => handleCopy(PROJECTS[0].codeSnippet, 0, e)}
-                        className="flex items-center space-x-1 text-xs hover:text-slate-200 cursor-pointer"
-                      >
-                        {copiedIndex === 0 ? <Check className="w-3 h-3 text-cyan-400" /> : <Copy className="w-3 h-3" />}
-                        <span>{copiedIndex === 0 ? 'Copied' : 'Copy'}</span>
-                      </button>
-                    </div>
-                    <pre className="p-3 text-slate-300 overflow-x-auto text-[11px] leading-relaxed">
-                      <code>{PROJECTS[0].codeSnippet}</code>
-                    </pre>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Project 2: LabelChecker AI */}
-          {PROJECTS[1] && (
-            <div
-              onMouseMove={handleCardMouseMove}
-              className="spotlight-card group relative p-6 md:p-7 shadow-xl"
-            >
-              <div className="relative z-10 space-y-4">
-                {/* Header Row */}
-                <div className="border-b border-slate-800/80 pb-3">
-                  <div className="flex items-center justify-between gap-2 mb-1.5">
-                    <span className="text-[11px] font-mono-code text-cyan-400">
-                      02 // {PROJECTS[1].category.toUpperCase()}
-                    </span>
-                    <span className="text-[10px] font-mono-code px-2 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300">
-                      {PROJECTS[1].benchmarkBadge}
-                    </span>
-                  </div>
-
-                  {/* PROJECT TITLE: 3D Visual ONLY triggers when hovering this title! */}
-                  <div className="flex items-center justify-between gap-2">
-                    <h3
-                      onMouseEnter={() => {
-                        sounds.playClick();
-                        onHoverProject('vision');
-                      }}
-                      onMouseLeave={() => onHoverProject(null)}
-                      className="text-xl sm:text-2xl font-black font-display text-slate-100 hover:text-cyan-300 transition-colors cursor-pointer inline-flex items-center gap-2 group-title"
-                    >
-                      <span>{PROJECTS[1].title}</span>
-                      <span className="text-[10px] font-mono-code px-1.5 py-0.5 rounded bg-cyan-400/20 text-cyan-300 border border-cyan-400/30">
-                        3D SIM ↗
-                      </span>
-                    </h3>
-
-                    <button
-                      onClick={() => openLink(PROJECTS[1].githubUrl)}
-                      className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-slate-900/90 hover:bg-cyan-500 hover:text-slate-950 border border-slate-700/60 text-xs font-mono-code text-slate-300 transition-all cursor-pointer shrink-0"
-                    >
-                      <span>GitHub</span>
-                      <ArrowUpRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Description */}
-                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-mono-code">
-                  {PROJECTS[1].description}
-                </p>
-
-                {/* Visual Architecture Pipeline Flow */}
-                <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800/80">
-                  <span className="text-[10px] font-mono-code text-slate-400 uppercase tracking-wider block mb-1.5">
-                    Pipeline Architecture:
-                  </span>
-                  <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-mono-code">
-                    {PROJECTS[1].architecturePipeline.map((step, idx) => (
-                      <div key={idx} className="flex items-center space-x-1.5">
-                        <span className="px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-200">
-                          {step}
-                        </span>
-                        {idx < PROJECTS[1].architecturePipeline.length - 1 && (
-                          <span className="text-cyan-400 font-bold">➔</span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Compact Specs Row with Mini Loss Sparkline */}
-                <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-850">
-                  <div className="flex flex-wrap gap-2">
-                    {PROJECTS[1].stats.map((s, i) => (
-                      <div key={i} className="px-2.5 py-1 rounded-lg bg-slate-900/90 border border-slate-800 text-[11px] font-mono-code">
-                        <span className="text-slate-400 mr-1">{s.label}:</span>
-                        <span className="font-semibold text-cyan-400">{s.value}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    {renderSparkline(PROJECTS[1].sparklineData, '#00e5ff')}
-                  </div>
-                </div>
-
-                {/* Collapsible Kernel Code */}
-                <div className="flex items-center justify-between pt-1">
-                  <div className="flex flex-wrap gap-1.5">
-                    {PROJECTS[1].techStack.map((tech, idx) => (
-                      <span key={idx} className="px-2 py-0.5 text-[10px] font-mono-code rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
-                        {tech}
-                      </span>
-                    ))}
-                  </div>
-
-                  <button
-                    onClick={(e) => toggleCodeExpand(1, e)}
-                    className="flex items-center space-x-1 text-[11px] font-mono-code text-slate-400 hover:text-cyan-300 transition-colors cursor-pointer"
-                  >
-                    <Terminal className="w-3 h-3 text-cyan-400" />
-                    <span>{expandedCodeIndex === 1 ? 'Hide' : 'Pipeline'}</span>
-                    {expandedCodeIndex === 1 ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-                  </button>
-                </div>
-
-                {expandedCodeIndex === 1 && (
-                  <div className="rounded-xl bg-slate-950 border border-slate-800 overflow-hidden font-mono-code text-[11px]">
-                    <div className="flex items-center justify-between px-3 py-1.5 bg-slate-900/80 border-b border-slate-800 text-slate-400">
-                      <span>YOLOv8 + OCR Verification Pipeline</span>
-                      <button
-                        onClick={(e) => handleCopy(PROJECTS[1].codeSnippet, 1, e)}
-                        className="flex items-center space-x-1 text-xs hover:text-slate-200 cursor-pointer"
-                      >
-                        {copiedIndex === 1 ? <Check className="w-3 h-3 text-cyan-400" /> : <Copy className="w-3 h-3" />}
-                        <span>{copiedIndex === 1 ? 'Copied' : 'Copy'}</span>
-                      </button>
-                    </div>
-                    <pre className="p-3 text-slate-300 overflow-x-auto text-[11px] leading-relaxed">
-                      <code>{PROJECTS[1].codeSnippet}</code>
-                    </pre>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Project 3: Healthcare System */}
-          {PROJECTS[2] && (
-            <div
-              onMouseMove={handleCardMouseMove}
-              className="spotlight-card group relative p-6 md:p-7 shadow-xl"
-            >
-              <div className="relative z-10 space-y-4">
-                {/* Header Row */}
-                <div className="border-b border-slate-800/80 pb-3">
-                  <div className="flex items-center justify-between gap-2 mb-1.5">
-                    <span className="text-[11px] font-mono-code text-cyan-400">
-                      03 // {PROJECTS[2].category.toUpperCase()}
-                    </span>
-                    <span className="text-[10px] font-mono-code px-2 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300">
-                      {PROJECTS[2].benchmarkBadge}
-                    </span>
-                  </div>
-
-                  {/* PROJECT TITLE: 3D Visual ONLY triggers when hovering this title! */}
-                  <div className="flex items-center justify-between gap-2">
-                    <h3
-                      onMouseEnter={() => {
-                        sounds.playClick();
-                        onHoverProject('healthcare');
-                      }}
-                      onMouseLeave={() => onHoverProject(null)}
-                      className="text-xl sm:text-2xl font-black font-display text-slate-100 hover:text-cyan-300 transition-colors cursor-pointer inline-flex items-center gap-2 group-title"
-                    >
-                      <span>{PROJECTS[2].title}</span>
-                      <span className="text-[10px] font-mono-code px-1.5 py-0.5 rounded bg-cyan-400/20 text-cyan-300 border border-cyan-400/30">
-                        3D SIM ↗
-                      </span>
-                    </h3>
-
-                    <button
-                      onClick={() => openLink(PROJECTS[2].githubUrl)}
-                      className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-slate-900/90 hover:bg-cyan-500 hover:text-slate-950 border border-slate-700/60 text-xs font-mono-code text-slate-300 transition-all cursor-pointer shrink-0"
-                    >
-                      <span>GitHub</span>
-                      <ArrowUpRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Description */}
-                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-mono-code">
-                  {PROJECTS[2].description}
-                </p>
-
-                {/* Visual Architecture Pipeline Flow */}
-                <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800/80">
-                  <span className="text-[10px] font-mono-code text-slate-400 uppercase tracking-wider block mb-1.5">
-                    Pipeline Architecture:
-                  </span>
-                  <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-mono-code">
-                    {PROJECTS[2].architecturePipeline.map((step, idx) => (
-                      <div key={idx} className="flex items-center space-x-1.5">
-                        <span className="px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-200">
-                          {step}
-                        </span>
-                        {idx < PROJECTS[2].architecturePipeline.length - 1 && (
-                          <span className="text-cyan-400 font-bold">➔</span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Compact Specs Row with Mini Loss Sparkline */}
-                <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-850">
-                  <div className="flex flex-wrap gap-2">
-                    {PROJECTS[2].stats.map((s, i) => (
-                      <div key={i} className="px-2.5 py-1 rounded-lg bg-slate-900/90 border border-slate-800 text-[11px] font-mono-code">
-                        <span className="text-slate-400 mr-1">{s.label}:</span>
-                        <span className="font-semibold text-cyan-400">{s.value}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    {renderSparkline(PROJECTS[2].sparklineData, '#00e5ff')}
-                  </div>
-                </div>
-
-                {/* Collapsible Kernel Code */}
-                <div className="flex items-center justify-between pt-1">
-                  <div className="flex flex-wrap gap-1.5">
-                    {PROJECTS[2].techStack.map((tech, idx) => (
-                      <span key={idx} className="px-2 py-0.5 text-[10px] font-mono-code rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
-                        {tech}
-                      </span>
-                    ))}
-                  </div>
-
-                  <button
-                    onClick={(e) => toggleCodeExpand(2, e)}
-                    className="flex items-center space-x-1 text-[11px] font-mono-code text-slate-400 hover:text-cyan-300 transition-colors cursor-pointer"
-                  >
-                    <Terminal className="w-3 h-3 text-cyan-400" />
-                    <span>{expandedCodeIndex === 2 ? 'Hide' : 'Dispatcher'}</span>
-                    {expandedCodeIndex === 2 ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-                  </button>
-                </div>
-
-                {expandedCodeIndex === 2 && (
-                  <div className="rounded-xl bg-slate-950 border border-slate-800 overflow-hidden font-mono-code text-[11px]">
-                    <div className="flex items-center justify-between px-3 py-1.5 bg-slate-900/80 border-b border-slate-800 text-slate-400">
-                      <span>Transactional Telemetry Dispatcher</span>
-                      <button
-                        onClick={(e) => handleCopy(PROJECTS[2].codeSnippet, 2, e)}
-                        className="flex items-center space-x-1 text-xs hover:text-slate-200 cursor-pointer"
-                      >
-                        {copiedIndex === 2 ? <Check className="w-3 h-3 text-cyan-400" /> : <Copy className="w-3 h-3" />}
-                        <span>{copiedIndex === 2 ? 'Copied' : 'Copy'}</span>
-                      </button>
-                    </div>
-                    <pre className="p-3 text-slate-300 overflow-x-auto text-[11px] leading-relaxed">
-                      <code>{PROJECTS[2].codeSnippet}</code>
-                    </pre>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
         </div>
       </section>
 

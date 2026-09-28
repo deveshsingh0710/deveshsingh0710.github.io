@@ -18,8 +18,9 @@ export function App() {
       {/* 3D WebGL Canvas fixed in the background (Features Quantum Core, Liquid-Fill Conduit, and Hover Portal) */}
       <CinemaScene scrollProgress={scrollProgress} hoveredProject={hoveredProject} />
 
-      {/* Clean Editorial Layout with Left-Aligned Cards and Clear Pipeline Gutter */}
+      {/* Clean Editorial Layout with Single Sticky Card synchronized to fluid thread limits */}
       <PortfolioLayout
+        scrollProgress={scrollProgress}
         onScrollTo={scrollToSection}
         onHoverProject={setHoveredProject}
       />
