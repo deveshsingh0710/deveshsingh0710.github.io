@@ -5,6 +5,7 @@ import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
 import * as THREE from 'three';
 import { CurvedThread3D } from './CurvedThread3D';
 import { FloatingHoverPortal } from './FloatingHoverPortal';
+import { HeroInteractive3D } from './HeroInteractive3D';
 
 interface CinemaSceneProps {
   scrollProgress: number; // 0.0 to 1.0 (real page scroll)
@@ -17,13 +18,13 @@ function SceneWorld({ scrollProgress, hoveredProject }: CinemaSceneProps) {
   useFrame((state) => {
     // Thread & world descends smoothly with scroll progress
     if (worldGroupRef.current) {
-      const targetY = scrollProgress * 9.5;
+      const targetY = scrollProgress * 7.0;
       worldGroupRef.current.position.y = THREE.MathUtils.lerp(worldGroupRef.current.position.y, targetY, 0.08);
 
       // Subtle mouse parallax on the world
       worldGroupRef.current.rotation.y = THREE.MathUtils.lerp(
         worldGroupRef.current.rotation.y,
-        state.pointer.x * 0.1,
+        state.pointer.x * 0.08,
         0.05
       );
     }
@@ -31,16 +32,20 @@ function SceneWorld({ scrollProgress, hoveredProject }: CinemaSceneProps) {
 
   return (
     <>
+      {/* 1. Interactive 3D Hero Object for Opening Frame (Tilts with cursor, disappears on scroll) */}
+      <HeroInteractive3D scrollProgress={scrollProgress} />
+
+      {/* 2. World Group that scrolls down through Projects */}
       <group ref={worldGroupRef} position={[0, 0, 0]}>
-        {/* 1. Organic 3D Curved S-Spline Thread */}
+        {/* Organic 3D Curved S-Spline Thread (Begins at Projects, zero visibility in Hero) */}
         <CurvedThread3D scrollProgress={scrollProgress} />
 
-        {/* Ambient Grid Planes along the curve */}
-        <gridHelper args={[32, 64, '#064e3b', '#021812']} position={[0, -1.8, 0]} />
-        <gridHelper args={[32, 64, '#064e3b', '#021812']} position={[0, -8.8, 0]} />
+        {/* Subtle Ambient Grid Plane */}
+        <gridHelper args={[24, 48, '#064e3b', '#021812']} position={[0, -2.5, 0]} />
+        <gridHelper args={[24, 48, '#064e3b', '#021812']} position={[0, -7.5, 0]} />
       </group>
 
-      {/* 2. Magnetic Floating Hover Portal (Tracks cursor, only active on project hover!) */}
+      {/* 3. Magnetic Floating Hover Portal (Tracks cursor, only active on project hover!) */}
       <FloatingHoverPortal hoveredProject={hoveredProject} />
     </>
   );
@@ -70,9 +75,9 @@ export function CinemaScene({ scrollProgress, hoveredProject }: CinemaSceneProps
 
         {/* Floating Atmospheric Sparkles */}
         <Sparkles
-          count={80}
-          scale={[16, 20, 14]}
-          size={1.5}
+          count={70}
+          scale={[16, 18, 14]}
+          size={1.4}
           speed={0.2}
           opacity={0.3}
           color="#34d399"
