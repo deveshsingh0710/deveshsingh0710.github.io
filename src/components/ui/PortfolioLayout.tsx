@@ -8,11 +8,13 @@ import { GithubIcon } from './Icons';
 import { PROJECTS, DEVELOPER_BIO } from '../../data/projectsData';
 import { sounds } from '../../utils/audio';
 import { getActiveCheckpoint } from '../../utils/fluidSync';
+import type { SectionId } from '../../hooks/useSmoothScroll';
 
 interface PortfolioLayoutProps {
   scrollProgress: number;
   projectsProgress: number;
   isInsideProjects: boolean;
+  activeSection: SectionId;
   onScrollTo: (id: string) => void;
   onHoverProject: (project: 'quantum' | 'vision' | 'healthcare' | null) => void;
 }
@@ -20,6 +22,7 @@ interface PortfolioLayoutProps {
 export function PortfolioLayout({
   projectsProgress,
   isInsideProjects,
+  activeSection,
   onScrollTo,
   onHoverProject
 }: PortfolioLayoutProps) {
@@ -109,12 +112,21 @@ export function PortfolioLayout({
 
   const currentProject = PROJECTS[displayedCheckpoint - 1] || PROJECTS[0];
 
+  const getNavLinkClass = (section: SectionId) => {
+    const isActive = activeSection === section;
+    return `px-3 py-1 rounded-full text-xs font-mono-code transition-all cursor-pointer ${
+      isActive
+        ? 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 font-semibold shadow-sm shadow-cyan-500/20'
+        : 'text-slate-400 hover:text-cyan-300'
+    }`;
+  };
+
   return (
     <div className="relative z-10 w-full text-slate-100 pointer-events-auto">
       {/* ========================================================
-          TOP NAVIGATION HEADER
+          TOP NAVIGATION HEADER (With Dynamic ScrollSpy)
       ======================================================== */}
-      <header className="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-6 md:px-14 py-3.5 bg-[#080B14]/80 border-b border-white/10 backdrop-blur-xl">
+      <header className="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-6 md:px-12 py-3.5 bg-[#080B14]/85 border-b border-white/[0.08] backdrop-blur-xl">
         <div className="flex items-center space-x-3 cursor-pointer" onClick={() => onScrollTo('hero')}>
           <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#0052F2] to-[#22D3EE] p-[1px] shadow-lg shadow-cyan-500/20">
             <div className="w-full h-full bg-[#080B14] rounded-lg flex items-center justify-center text-cyan-300 font-mono-code font-bold text-xs">
@@ -133,21 +145,21 @@ export function PortfolioLayout({
           </div>
         </div>
 
-        {/* Navigation Links: Home, About, Projects, Skills, Contact */}
-        <nav className="hidden md:flex items-center space-x-8 text-xs font-mono-code text-slate-400">
-          <button onClick={() => onScrollTo('hero')} className="hover:text-cyan-400 transition-colors cursor-pointer">
+        {/* ScrollSpy Navigation Links */}
+        <nav className="hidden md:flex items-center space-x-2 bg-slate-900/60 p-1 rounded-full border border-white/[0.06]">
+          <button onClick={() => onScrollTo('hero')} className={getNavLinkClass('hero')}>
             Home
           </button>
-          <button onClick={() => onScrollTo('about')} className="hover:text-cyan-400 transition-colors cursor-pointer">
+          <button onClick={() => onScrollTo('about')} className={getNavLinkClass('about')}>
             About
           </button>
-          <button onClick={() => onScrollTo('projects')} className="hover:text-cyan-400 transition-colors cursor-pointer text-cyan-400 font-semibold">
+          <button onClick={() => onScrollTo('projects')} className={getNavLinkClass('projects')}>
             Projects
           </button>
-          <button onClick={() => onScrollTo('skills')} className="hover:text-cyan-400 transition-colors cursor-pointer">
+          <button onClick={() => onScrollTo('skills')} className={getNavLinkClass('skills')}>
             Skills
           </button>
-          <button onClick={() => onScrollTo('contact')} className="hover:text-cyan-400 transition-colors cursor-pointer">
+          <button onClick={() => onScrollTo('contact')} className={getNavLinkClass('contact')}>
             Contact
           </button>
         </nav>
@@ -174,10 +186,10 @@ export function PortfolioLayout({
       </header>
 
       {/* ========================================================
-          01 // HERO SECTION (Matches Design System image)
+          01 // HERO SECTION (Aligned strictly within max-w-6xl)
       ======================================================== */}
-      <section id="hero" className="min-h-screen flex items-center px-6 md:px-14 pt-24 pb-16">
-        <div className="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+      <section id="hero" className="min-h-screen flex items-center px-6 md:px-12 pt-24 pb-16">
+        <div className="w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
           {/* Left Hero Details */}
           <div className="lg:col-span-7 space-y-6">
             <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 font-mono-code text-xs backdrop-blur-md shadow-lg shadow-cyan-500/10">
@@ -271,16 +283,21 @@ export function PortfolioLayout({
         </div>
 
         {/* Scroll Down Indicator */}
-        <div className="absolute bottom-6 right-6 md:right-14 hidden sm:flex items-center space-x-2 text-xs font-mono-code text-slate-400">
+        <div className="absolute bottom-6 right-6 md:right-12 hidden sm:flex items-center space-x-2 text-xs font-mono-code text-slate-400">
           <ChevronDown className="w-4 h-4 text-cyan-400 animate-bounce" />
           <span>Scroll Down</span>
         </div>
       </section>
 
+      {/* Smooth Ambient Gradient Transition */}
+      <div className="w-full max-w-6xl mx-auto px-6 md:px-12">
+        <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-cyan-500/25 to-transparent" />
+      </div>
+
       {/* ========================================================
-          02 // ABOUT SECTION
+          02 // ABOUT SECTION (Aligned strictly within max-w-6xl)
       ======================================================== */}
-      <section id="about" className="py-24 px-6 md:px-14 border-t border-slate-800/80 bg-[#080B14]/60">
+      <section id="about" className="py-24 px-6 md:px-12">
         <div className="w-full max-w-6xl mx-auto space-y-12">
           <div>
             <span className="text-xs font-mono-code uppercase tracking-widest text-cyan-400 block mb-1">
@@ -302,15 +319,15 @@ export function PortfolioLayout({
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3">
-                <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+                <div className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800">
                   <span className="text-[#22D3EE] font-bold block mb-1">01 / Algorithmic Core</span>
                   <span className="text-[11px] text-slate-400">Deep expertise in C++, Data Structures, and computational math.</span>
                 </div>
-                <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+                <div className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800">
                   <span className="text-[#8B5CF6] font-bold block mb-1">02 / Applied AI</span>
                   <span className="text-[11px] text-slate-400">PyTorch, YOLOv8, and custom neural feature backbones.</span>
                 </div>
-                <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+                <div className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800">
                   <span className="text-[#D8FF64] font-bold block mb-1">03 / Modern Systems</span>
                   <span className="text-[11px] text-slate-400">FastAPI, Docker, PostgreSQL, and low-latency microservices.</span>
                 </div>
@@ -326,7 +343,7 @@ export function PortfolioLayout({
                   </span>
                   <button
                     onClick={handleCopySnippet}
-                    className="flex items-center space-x-1 px-2 py-1 rounded bg-slate-900 hover:bg-slate-800 text-[10px] font-mono-code text-slate-300 border border-slate-700 cursor-pointer transition-all"
+                    className="flex items-center space-x-1 px-2.5 py-1 rounded bg-slate-900 hover:bg-slate-800 text-[10px] font-mono-code text-slate-300 border border-slate-700 cursor-pointer transition-all"
                   >
                     {copiedSnippet ? <Check className="w-3 h-3 text-cyan-400" /> : <Copy className="w-3 h-3" />}
                     <span>{copiedSnippet ? 'Copied' : 'Copy'}</span>
@@ -349,26 +366,19 @@ export function PortfolioLayout({
         </div>
       </section>
 
+      {/* Smooth Ambient Gradient Transition */}
+      <div className="w-full max-w-6xl mx-auto px-6 md:px-12">
+        <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-cyan-500/25 to-transparent" />
+      </div>
+
       {/* ========================================================
           03 // PROJECTS SECTION (THE 3D FLUID THREAD CONDUIT)
-          - Exactly what user loved: 3 projects docking on the thread!
+          - Aligned STRICTLY to the exact same left column!
+          - Well-balanced with Stepper, Telemetry HUD & Stage Indicators!
       ======================================================== */}
-      <section id="projects" className="relative min-h-[280vh] border-t border-slate-800/80">
-        {/* Real-time Telemetry HUD (Fixed top indicator while inside #projects) */}
-        {isInsideProjects && (
-          <div className="fixed top-20 left-6 md:left-14 z-30 flex items-center space-x-3 text-[11px] font-mono-code bg-slate-950/85 px-3.5 py-1.5 rounded-xl border border-cyan-500/30 backdrop-blur-xl shadow-lg">
-            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
-            <span className="text-slate-400">FLUID CONDUIT:</span>
-            <span className="text-cyan-300 font-bold">{(projectsProgress * 100).toFixed(0)}%</span>
-            <span className="text-slate-500">|</span>
-            <span className="text-emerald-400 font-semibold">
-              {activeCheckpoint !== null ? `PROJECT 0${activeCheckpoint} DOCKED` : 'CONDUIT IN TRANSIT...'}
-            </span>
-          </div>
-        )}
-
-        {/* Section Intro Banner */}
-        <div className="pt-20 px-6 md:px-14 max-w-6xl mx-auto">
+      <section id="projects" className="relative min-h-[280vh]">
+        {/* Section Intro Banner inside max-w-6xl */}
+        <div className="pt-20 px-6 md:px-12 max-w-6xl mx-auto">
           <span className="text-xs font-mono-code uppercase tracking-widest text-cyan-400 block mb-1">
             02 // FEATURED PROJECTS
           </span>
@@ -376,117 +386,170 @@ export function PortfolioLayout({
             Interactive 3D Fluid Scrubbing Pipeline
           </h2>
           <p className="text-xs font-mono-code text-slate-400 mt-1 max-w-lg">
-            Scroll down to scrub the fluid conduit. Projects dock at designated checkpoints with 3D simulation portals on hover.
+            Scroll down to scrub fluid through the capillary conduit. Projects dock at designated checkpoints with 3D simulation portals on hover.
           </p>
         </div>
 
         {/* ========================================================
             FIXED FLOATING HUD PROJECT CARD
-            - Locked on left-6 md:left-14
-            - Compact width max-w-[380px]
+            - Aligned perfectly with max-w-6xl mx-auto px-6 md:px-12!
+            - No more jumping to the screen edges!
             - APPEARS ONLY AT DOCK CHECKPOINTS!
             - DISAPPEARS ("HAT JATA HAI") WHEN SCROLLING BETWEEN POINTS!
-            - ZERO OVERLAPPING EVER!
         ======================================================== */}
-        <div
-          className={`fixed left-6 md:left-14 top-1/2 -translate-y-1/2 z-30 w-full max-w-[380px] transition-all duration-300 ease-out ${
-            isCardVisible
-              ? 'opacity-100 scale-100 pointer-events-auto translate-y-0'
-              : 'opacity-0 scale-95 pointer-events-none translate-y-3'
-          }`}
-        >
-          {currentProject && (
-            <div
-              onMouseMove={handleCardMouseMove}
-              className="spotlight-card w-full p-4 sm:p-4.5 shadow-2xl border border-cyan-500/30 bg-slate-900/95 backdrop-blur-2xl rounded-2xl space-y-2.5"
-            >
-              {/* Header Row */}
-              <div className="border-b border-slate-800/80 pb-2">
-                <div className="flex items-center justify-between gap-2 mb-1">
-                  <span className="text-[10px] font-mono-code text-cyan-400 font-bold uppercase tracking-wider">
-                    ◈ PROJECT 0{displayedCheckpoint} // {currentProject.category}
-                  </span>
-                  <span className="text-[9px] font-mono-code px-2 py-0.5 rounded-full bg-cyan-500/15 border border-cyan-500/30 text-cyan-300">
-                    {currentProject.benchmarkBadge}
-                  </span>
-                </div>
+        <div className="fixed top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 w-full max-w-6xl px-6 md:px-12 z-30 pointer-events-none">
+          <div
+            className={`w-full max-w-[420px] transition-all duration-300 ease-out ${
+              isCardVisible
+                ? 'opacity-100 scale-100 pointer-events-auto translate-y-0'
+                : 'opacity-0 scale-95 pointer-events-none translate-y-3'
+            }`}
+          >
+            {/* Visual Pipeline Stage Stepper Bar */}
+            <div className="flex items-center space-x-2 text-[10px] font-mono-code mb-2.5 bg-slate-950/80 p-1.5 rounded-xl border border-slate-800 backdrop-blur-xl">
+              <span
+                className={`px-2 py-0.5 rounded-lg border transition-all ${
+                  displayedCheckpoint === 1
+                    ? 'bg-cyan-500/20 text-cyan-300 border-cyan-400 font-bold shadow-sm shadow-cyan-500/30'
+                    : 'text-slate-500 border-slate-800'
+                }`}
+              >
+                01 Quantum
+              </span>
+              <span className="text-slate-600">➔</span>
+              <span
+                className={`px-2 py-0.5 rounded-lg border transition-all ${
+                  displayedCheckpoint === 2
+                    ? 'bg-cyan-500/20 text-cyan-300 border-cyan-400 font-bold shadow-sm shadow-cyan-500/30'
+                    : 'text-slate-500 border-slate-800'
+                }`}
+              >
+                02 Vision
+              </span>
+              <span className="text-slate-600">➔</span>
+              <span
+                className={`px-2 py-0.5 rounded-lg border transition-all ${
+                  displayedCheckpoint === 3
+                    ? 'bg-cyan-500/20 text-cyan-300 border-cyan-400 font-bold shadow-sm shadow-cyan-500/30'
+                    : 'text-slate-500 border-slate-800'
+                }`}
+              >
+                03 Telemetry
+              </span>
+            </div>
 
-                {/* Project Title (Hover summons 3D simulation) */}
-                <div className="flex items-center justify-between gap-2 pt-0.5">
-                  <h3
-                    onMouseEnter={() => {
-                      sounds.playClick();
-                      onHoverProject(currentProject.id === 'quantum-tunneling' ? 'quantum' : currentProject.id === 'labelchecker' ? 'vision' : 'healthcare');
-                    }}
-                    onMouseLeave={() => onHoverProject(null)}
-                    className="text-base sm:text-lg font-black font-display text-slate-100 hover:text-cyan-300 transition-colors cursor-pointer inline-flex items-center gap-1.5"
-                  >
-                    <span>{currentProject.title}</span>
-                    <span className="text-[8px] font-mono-code px-1.5 py-0.5 rounded bg-cyan-400/20 text-cyan-300 border border-cyan-400/30">
-                      3D SIM ↗
+            {/* Spotlight Card */}
+            {currentProject && (
+              <div
+                onMouseMove={handleCardMouseMove}
+                className="spotlight-card w-full p-4 sm:p-5 shadow-2xl border border-cyan-500/30 bg-[#0F172A]/95 backdrop-blur-2xl rounded-2xl space-y-3"
+              >
+                {/* Header Row */}
+                <div className="border-b border-slate-800/80 pb-2.5">
+                  <div className="flex items-center justify-between gap-2 mb-1">
+                    <span className="text-[10px] font-mono-code text-cyan-400 font-bold uppercase tracking-wider flex items-center space-x-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
+                      <span>CHECKPOINT 0{displayedCheckpoint} // {currentProject.category}</span>
                     </span>
-                  </h3>
+                    <span className="text-[9px] font-mono-code px-2 py-0.5 rounded-full bg-cyan-500/15 border border-cyan-500/30 text-cyan-300">
+                      {currentProject.benchmarkBadge}
+                    </span>
+                  </div>
 
-                  <button
-                    onClick={() => openLink(currentProject.githubUrl)}
-                    className="flex items-center space-x-1 px-2 py-1 rounded-lg bg-slate-900 hover:bg-cyan-500 hover:text-slate-950 border border-slate-700/60 text-[10px] font-mono-code text-slate-300 transition-all cursor-pointer shrink-0"
-                  >
-                    <span>Repo</span>
-                    <ArrowUpRight className="w-3 h-3" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Concise 2-line Description */}
-              <p className="text-xs text-slate-300 leading-relaxed font-mono-code line-clamp-2">
-                {currentProject.description}
-              </p>
-
-              {/* Compact Architecture Pipeline */}
-              <div className="p-2 rounded-lg bg-slate-950/80 border border-slate-800/80 text-[10px] font-mono-code">
-                <span className="text-slate-400 block mb-1 uppercase tracking-wider text-[8px]">
-                  Pipeline Flow:
-                </span>
-                <div className="flex items-center space-x-1 text-slate-200 overflow-x-auto">
-                  {currentProject.architecturePipeline.slice(0, 3).map((step, idx) => (
-                    <span key={idx} className="flex items-center space-x-1 shrink-0">
-                      <span className="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700/60 text-[9px]">
-                        {step}
+                  {/* Project Title (Hover summons 3D simulation) */}
+                  <div className="flex items-center justify-between gap-2 pt-0.5">
+                    <h3
+                      onMouseEnter={() => {
+                        sounds.playClick();
+                        onHoverProject(currentProject.id === 'quantum-tunneling' ? 'quantum' : currentProject.id === 'labelchecker' ? 'vision' : 'healthcare');
+                      }}
+                      onMouseLeave={() => onHoverProject(null)}
+                      className="text-base sm:text-lg font-black font-display text-slate-100 hover:text-cyan-300 transition-colors cursor-pointer inline-flex items-center gap-1.5"
+                    >
+                      <span>{currentProject.title}</span>
+                      <span className="text-[8px] font-mono-code px-1.5 py-0.5 rounded bg-cyan-400/20 text-cyan-300 border border-cyan-400/30">
+                        3D SIM ↗
                       </span>
-                      {idx < 2 && <span className="text-cyan-400 font-bold text-[9px]">➔</span>}
-                    </span>
-                  ))}
+                    </h3>
+
+                    <button
+                      onClick={() => openLink(currentProject.githubUrl)}
+                      className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-cyan-500 hover:text-slate-950 border border-slate-700/60 text-[10px] font-mono-code text-slate-300 transition-all cursor-pointer shrink-0"
+                    >
+                      <span>Repo</span>
+                      <ArrowUpRight className="w-3 h-3" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Concise 2-line Description */}
+                <p className="text-xs text-slate-300 leading-relaxed font-mono-code line-clamp-2">
+                  {currentProject.description}
+                </p>
+
+                {/* Compact Architecture Pipeline */}
+                <div className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800/80 text-[10px] font-mono-code">
+                  <span className="text-slate-400 block mb-1 uppercase tracking-wider text-[8px]">
+                    Pipeline Flow:
+                  </span>
+                  <div className="flex items-center space-x-1 text-slate-200 overflow-x-auto">
+                    {currentProject.architecturePipeline.slice(0, 3).map((step, idx) => (
+                      <span key={idx} className="flex items-center space-x-1 shrink-0">
+                        <span className="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700/60 text-[9px]">
+                          {step}
+                        </span>
+                        {idx < 2 && <span className="text-cyan-400 font-bold text-[9px]">➔</span>}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Specs Row */}
+                <div className="flex items-center justify-between pt-1 border-t border-slate-800/60 text-[10px] font-mono-code">
+                  <div className="flex items-center space-x-2">
+                    {currentProject.stats.slice(0, 2).map((s, i) => (
+                      <div key={i} className="text-slate-400">
+                        <span>{s.label}: </span>
+                        <span className="text-cyan-300 font-bold">{s.value}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center space-x-1">
+                    {currentProject.techStack.slice(0, 2).map((tech, idx) => (
+                      <span key={idx} className="px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 text-[9px]">
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
+            )}
 
-              {/* Compact Specs Row */}
-              <div className="flex items-center justify-between pt-1 border-t border-slate-800/60 text-[10px] font-mono-code">
-                <div className="flex items-center space-x-2">
-                  {currentProject.stats.slice(0, 2).map((s, i) => (
-                    <div key={i} className="text-slate-400">
-                      <span>{s.label}: </span>
-                      <span className="text-cyan-300 font-bold">{s.value}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="flex items-center space-x-1">
-                  {currentProject.techStack.slice(0, 2).map((tech, idx) => (
-                    <span key={idx} className="px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 text-[8px]">
-                      {tech}
-                    </span>
-                  ))}
-                </div>
+            {/* Quick Dock Navigation Shortcuts */}
+            <div className="mt-2.5 flex items-center justify-between p-2 rounded-xl bg-slate-950/70 border border-slate-800/80 text-[10px] font-mono-code text-slate-400 backdrop-blur-md">
+              <span className="text-slate-500">Fast Dock:</span>
+              <div className="flex items-center space-x-2">
+                <button onClick={() => onScrollTo('p1')} className="hover:text-cyan-400 cursor-pointer">P1</button>
+                <span className="text-slate-700">•</span>
+                <button onClick={() => onScrollTo('p2')} className="hover:text-cyan-400 cursor-pointer">P2</button>
+                <span className="text-slate-700">•</span>
+                <button onClick={() => onScrollTo('p3')} className="hover:text-cyan-400 cursor-pointer">P3</button>
               </div>
             </div>
-          )}
+          </div>
         </div>
       </section>
 
+      {/* Smooth Ambient Gradient Transition */}
+      <div className="w-full max-w-6xl mx-auto px-6 md:px-12">
+        <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-cyan-500/25 to-transparent" />
+      </div>
+
       {/* ========================================================
-          04 // SKILLS SECTION (Matches Color Palette & Tags in image)
+          04 // SKILLS SECTION (Strictly aligned to max-w-6xl)
       ======================================================== */}
-      <section id="skills" className="py-24 px-6 md:px-14 border-t border-slate-800/80 bg-[#080B14]">
+      <section id="skills" className="py-24 px-6 md:px-12">
         <div className="w-full max-w-6xl mx-auto space-y-12">
           <div>
             <span className="text-xs font-mono-code uppercase tracking-widest text-cyan-400 block mb-1">
@@ -505,9 +568,9 @@ export function PortfolioLayout({
               <div
                 key={cIdx}
                 onMouseMove={handleCardMouseMove}
-                className="spotlight-card p-5 rounded-2xl border border-slate-800/80 bg-[#0F172A]/70 backdrop-blur-xl space-y-3"
+                className="spotlight-card p-5 sm:p-6 rounded-2xl border border-slate-800/80 bg-[#0F172A]/70 backdrop-blur-xl space-y-3.5"
               >
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2.5">
                   <div className="p-2 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
                     {cIdx === 0 && <Code2 className="w-4 h-4" />}
                     {cIdx === 1 && <Cpu className="w-4 h-4" />}
@@ -529,13 +592,18 @@ export function PortfolioLayout({
                           sounds.playClick();
                           setSelectedSkill(isSelected ? null : skill);
                         }}
-                        className={`px-3 py-1.5 text-xs font-mono-code rounded-lg border transition-all cursor-pointer ${
+                        className={`px-3 py-1.5 text-xs font-mono-code rounded-lg border transition-all cursor-pointer flex items-center space-x-1.5 ${
                           isSelected
                             ? 'bg-gradient-to-r from-[#0052F2] to-[#22D3EE] text-slate-950 font-bold border-cyan-300 shadow-md shadow-cyan-500/25'
                             : 'bg-slate-900/90 border-slate-800 text-slate-300 hover:border-cyan-500/50 hover:text-cyan-300'
                         }`}
                       >
-                        {skill}
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full ${
+                            cIdx === 0 ? 'bg-[#0052F2]' : cIdx === 1 ? 'bg-[#22D3EE]' : cIdx === 2 ? 'bg-[#8B5CF6]' : 'bg-[#D8FF64]'
+                          }`}
+                        />
+                        <span>{skill}</span>
                       </button>
                     );
                   })}
@@ -546,10 +614,15 @@ export function PortfolioLayout({
         </div>
       </section>
 
+      {/* Smooth Ambient Gradient Transition */}
+      <div className="w-full max-w-6xl mx-auto px-6 md:px-12">
+        <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-cyan-500/25 to-transparent" />
+      </div>
+
       {/* ========================================================
-          05 // CONTACT SECTION (Form + Quick Connect Channels)
+          05 // CONTACT SECTION (Strictly aligned to max-w-6xl)
       ======================================================== */}
-      <section id="contact" className="py-24 px-6 md:px-14 border-t border-slate-800/80 bg-[#080B14]/80">
+      <section id="contact" className="py-24 px-6 md:px-12">
         <div className="w-full max-w-6xl mx-auto space-y-12">
           <div>
             <span className="text-xs font-mono-code uppercase tracking-widest text-cyan-400 block mb-1">
@@ -564,7 +637,7 @@ export function PortfolioLayout({
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            {/* Direct Connect Options */}
+            {/* Direct Connect Channels */}
             <div className="lg:col-span-6 space-y-4">
               {/* Quick Clone Terminal */}
               <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800 flex items-center justify-between font-mono-code text-xs">
@@ -666,7 +739,7 @@ export function PortfolioLayout({
                     required
                     value={contactForm.message}
                     onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
-                    placeholder="Hi Devesh, let's collaborate on an AI/engineering project..."
+                    placeholder="Hi Devesh, let's collaborate on an engineering project..."
                     className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/80 border border-slate-800 focus:border-cyan-400 text-xs font-mono-code text-slate-200 outline-none transition-all resize-none"
                   />
                 </div>
@@ -685,10 +758,10 @@ export function PortfolioLayout({
       </section>
 
       {/* ========================================================
-          FOOTER
+          FOOTER (Aligned strictly to max-w-6xl)
       ======================================================== */}
-      <footer className="py-10 px-6 md:px-14 border-t border-slate-800/80 bg-[#080B14]/95 text-center text-xs font-mono-code text-slate-400 space-y-4">
-        <div className="flex flex-wrap items-center justify-center gap-6">
+      <footer className="py-10 px-6 md:px-12 border-t border-slate-800/80 bg-[#080B14]/95 text-center text-xs font-mono-code text-slate-400 space-y-4">
+        <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-center gap-6">
           <button onClick={() => onScrollTo('hero')} className="hover:text-cyan-400 transition-colors cursor-pointer">
             Home
           </button>

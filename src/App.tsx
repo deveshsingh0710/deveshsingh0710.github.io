@@ -4,7 +4,14 @@ import { PortfolioLayout } from './components/ui/PortfolioLayout';
 import { useSmoothScroll } from './hooks/useSmoothScroll';
 
 export function App() {
-  const { scrollProgress, projectsProgress, isInsideProjects, scrollToSection } = useSmoothScroll();
+  const {
+    scrollProgress,
+    projectsProgress,
+    isInsideProjects,
+    activeSection,
+    scrollToSection
+  } = useSmoothScroll();
+
   const [hoveredProject, setHoveredProject] = useState<'quantum' | 'vision' | 'healthcare' | null>(null);
 
   return (
@@ -28,6 +35,7 @@ export function App() {
         scrollProgress={scrollProgress}
         projectsProgress={projectsProgress}
         isInsideProjects={isInsideProjects}
+        activeSection={activeSection}
         onScrollTo={scrollToSection}
         onHoverProject={setHoveredProject}
       />

@@ -1,9 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 
+export type SectionId = 'hero' | 'about' | 'projects' | 'skills' | 'contact';
+
 export function useSmoothScroll() {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [projectsProgress, setProjectsProgress] = useState(0);
   const [isInsideProjects, setIsInsideProjects] = useState(false);
+  const [activeSection, setActiveSection] = useState<SectionId>('hero');
 
   const targetProgress = useRef(0);
   const currentProgress = useRef(0);
@@ -28,9 +31,10 @@ export function useSmoothScroll() {
     };
 
     const handleScroll = () => {
+      const scrollY = window.scrollY;
       const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
       if (maxScroll > 0) {
-        targetProgress.current = Math.min(Math.max(window.scrollY / maxScroll, 0), 1);
+        targetProgress.current = Math.min(Math.max(scrollY / maxScroll, 0), 1);
       }
 
       // Check projects section scroll progress
@@ -39,10 +43,27 @@ export function useSmoothScroll() {
         const top = projectsEl.offsetTop;
         const height = projectsEl.offsetHeight - window.innerHeight;
         if (height > 0) {
-          const p = Math.min(Math.max((window.scrollY - top) / height, 0), 1);
+          const p = Math.min(Math.max((scrollY - top) / height, 0), 1);
           setProjectsProgress(p);
-          setIsInsideProjects(window.scrollY >= top - 80 && window.scrollY <= top + height + 80);
+          setIsInsideProjects(scrollY >= top - 60 && scrollY <= top + height + 60);
         }
+      }
+
+      // Detect active section for ScrollSpy navbar
+      const aboutEl = document.getElementById('about');
+      const skillsEl = document.getElementById('skills');
+      const contactEl = document.getElementById('contact');
+
+      if (contactEl && scrollY >= contactEl.offsetTop - 260) {
+        setActiveSection('contact');
+      } else if (skillsEl && scrollY >= skillsEl.offsetTop - 260) {
+        setActiveSection('skills');
+      } else if (projectsEl && scrollY >= projectsEl.offsetTop - 260) {
+        setActiveSection('projects');
+      } else if (aboutEl && scrollY >= aboutEl.offsetTop - 260) {
+        setActiveSection('about');
+      } else {
+        setActiveSection('hero');
       }
 
       if (!isAnimating.current) {
@@ -88,5 +109,5 @@ export function useSmoothScroll() {
     }
   };
 
-  return { scrollProgress, projectsProgress, isInsideProjects, scrollToSection };
+  return { scrollProgress, projectsProgress, isInsideProjects, activeSection, scrollToSection };
 }
