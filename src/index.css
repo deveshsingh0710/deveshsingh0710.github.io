@@ -8,24 +8,64 @@
   
   html {
     scroll-behavior: smooth;
-    background-color: #030806;
+    background-color: #020605;
   }
 
   body, #root {
     width: 100%;
     margin: 0;
     padding: 0;
-    background-color: #030806;
-    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    background-color: #020605;
+    font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
   }
 }
 
+.font-display {
+  font-family: 'Syne', 'Space Grotesk', system-ui, sans-serif;
+  letter-spacing: -0.03em;
+}
+
 .font-serif-book {
-  font-family: 'Cinzel', serif;
+  font-family: 'Syne', system-ui, sans-serif;
 }
 
 .font-mono-code {
-  font-family: 'Fira Code', monospace;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+/* Apple / Linear Style Dynamic Card Spotlight Glow */
+.spotlight-card {
+  position: relative;
+  background: rgba(4, 15, 11, 0.7);
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  backdrop-filter: blur(16px);
+  overflow: hidden;
+  transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.spotlight-card:hover {
+  border-color: rgba(52, 211, 153, 0.45);
+  box-shadow: 0 10px 40px -10px rgba(16, 185, 129, 0.15);
+}
+
+.spotlight-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  background: radial-gradient(
+    600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(16, 185, 129, 0.15),
+    transparent 40%
+  );
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.spotlight-card:hover::before {
+  opacity: 1;
 }
 
 /* Custom Emerald Minimalist Scrollbar */
@@ -33,12 +73,12 @@
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #020806;
+  background: #020605;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.35);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(16, 185, 129, 0.7);
+  background: rgba(52, 211, 153, 0.7);
 }

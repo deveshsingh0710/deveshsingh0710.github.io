@@ -18,7 +18,7 @@ function SceneWorld({ scrollProgress, hoveredProject }: CinemaSceneProps) {
   useFrame((state) => {
     // Thread & world descends smoothly with scroll progress
     if (worldGroupRef.current) {
-      const targetY = scrollProgress * 7.0;
+      const targetY = scrollProgress * 7.2;
       worldGroupRef.current.position.y = THREE.MathUtils.lerp(worldGroupRef.current.position.y, targetY, 0.08);
 
       // Subtle mouse parallax on the world
@@ -32,7 +32,7 @@ function SceneWorld({ scrollProgress, hoveredProject }: CinemaSceneProps) {
 
   return (
     <>
-      {/* 1. Interactive 3D Hero Object for Opening Frame (Tilts with cursor, disappears on scroll) */}
+      {/* 1. Interactive 3D Hero Object for Opening Frame */}
       <HeroInteractive3D scrollProgress={scrollProgress} />
 
       {/* 2. World Group that scrolls down through Projects */}
@@ -40,9 +40,9 @@ function SceneWorld({ scrollProgress, hoveredProject }: CinemaSceneProps) {
         {/* Organic 3D Curved S-Spline Thread (Begins at Projects, zero visibility in Hero) */}
         <CurvedThread3D scrollProgress={scrollProgress} />
 
-        {/* Subtle Ambient Grid Plane */}
-        <gridHelper args={[24, 48, '#064e3b', '#021812']} position={[0, -2.5, 0]} />
-        <gridHelper args={[24, 48, '#064e3b', '#021812']} position={[0, -7.5, 0]} />
+        {/* Ambient Spatial Grids */}
+        <gridHelper args={[28, 56, '#064e3b', '#031710']} position={[0, -2.4, 0]} />
+        <gridHelper args={[28, 56, '#064e3b', '#031710']} position={[0, -7.2, 0]} />
       </group>
 
       {/* 3. Magnetic Floating Hover Portal (Tracks cursor, only active on project hover!) */}
@@ -61,39 +61,39 @@ export function CinemaScene({ scrollProgress, hoveredProject }: CinemaSceneProps
           alpha: true,
           powerPreference: 'high-performance',
           toneMapping: THREE.ACESFilmicToneMapping,
-          toneMappingExposure: 1.2,
+          toneMappingExposure: 1.25,
         }}
         dpr={[1, 2]}
       >
         <color attach="background" args={['#020605']} />
 
-        {/* Studio Lighting */}
-        <ambientLight intensity={0.7} />
-        <directionalLight position={[6, 9, 6]} intensity={2.5} color="#ecfdf5" />
-        <directionalLight position={[-6, -4, -3]} intensity={1.8} color="#10b981" />
-        <directionalLight position={[0, -6, 5]} intensity={1.2} color="#06b6d4" />
+        {/* Cinematic Studio Lighting */}
+        <ambientLight intensity={0.8} />
+        <directionalLight position={[6, 9, 6]} intensity={2.8} color="#ecfdf5" />
+        <directionalLight position={[-6, -4, -3]} intensity={2.0} color="#10b981" />
+        <directionalLight position={[0, -6, 5]} intensity={1.5} color="#06b6d4" />
 
-        {/* Floating Atmospheric Sparkles */}
+        {/* Floating Atmospheric Cyber Sparkles */}
         <Sparkles
-          count={70}
-          scale={[16, 18, 14]}
-          size={1.4}
-          speed={0.2}
-          opacity={0.3}
+          count={90}
+          scale={[18, 20, 16]}
+          size={1.6}
+          speed={0.25}
+          opacity={0.35}
           color="#34d399"
         />
 
         <SceneWorld scrollProgress={scrollProgress} hoveredProject={hoveredProject} />
 
-        {/* Cinematic Post-Processing Bloom & Vignette */}
+        {/* High-End Post-Processing: Soft Selective Bloom & Vignette */}
         <EffectComposer multisampling={4}>
           <Bloom
-            luminanceThreshold={0.55}
-            luminanceSmoothing={0.7}
-            intensity={1.2}
+            luminanceThreshold={0.52}
+            luminanceSmoothing={0.75}
+            intensity={1.3}
             mipmapBlur
           />
-          <Vignette eskil={false} offset={0.15} darkness={0.8} />
+          <Vignette eskil={false} offset={0.12} darkness={0.85} />
         </EffectComposer>
       </Canvas>
     </div>
