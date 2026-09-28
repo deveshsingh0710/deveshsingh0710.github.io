@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ExternalLink, Terminal, Copy, Check, ChevronDown, Volume2, VolumeX } from 'lucide-react';
+import { ExternalLink, Terminal, Copy, Check, ChevronDown, Volume2, VolumeX, Sparkles } from 'lucide-react';
 import { GithubIcon } from './Icons';
 import { PROJECTS, DEVELOPER_BIO } from '../../data/projectsData';
 import { sounds } from '../../utils/audio';
@@ -27,8 +27,6 @@ export function CinemaOverlay({ scrollProgress, activeStage, onJumpToStage }: Ci
     setTimeout(() => setCopiedCode(false), 2000);
   };
 
-  // Helper to calculate opacity based on distance to stage index
-  // Each stage is at 0.0, 0.25, 0.50, 0.75, 1.0
   const getStageVisibility = (stageIndex: number) => {
     const center = stageIndex * 0.25;
     const dist = Math.abs(scrollProgress - center);
@@ -52,12 +50,12 @@ export function CinemaOverlay({ scrollProgress, activeStage, onJumpToStage }: Ci
                 {DEVELOPER_BIO.name}
               </span>
               <span className="text-[10px] uppercase font-mono-code px-1.5 py-0.2 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-                Core v2.4
+                Luminous Core
               </span>
             </div>
             <p className="text-[10px] text-slate-400 font-mono-code flex items-center space-x-1.5 mt-0.5">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span>WebGL 60FPS • Real-time Scrollytelling</span>
+              <span>Real-time Fluid Dynamics • 60/120 FPS</span>
             </p>
           </div>
         </div>
@@ -85,7 +83,7 @@ export function CinemaOverlay({ scrollProgress, activeStage, onJumpToStage }: Ci
 
       {/* Right-Side Stage Scrubber Navigation */}
       <nav className="fixed right-6 top-1/2 -translate-y-1/2 z-30 flex flex-col items-center space-y-4 pointer-events-auto">
-        {['00 // ORIGIN', '01 // QUANTUM', '02 // VISION', '03 // HEALTH', '04 // CONNECT'].map((label, idx) => {
+        {['00 // SINGULARITY', '01 // QUANTUM', '02 // VISION', '03 // HEALTH', '04 // CONNECT'].map((label, idx) => {
           const isActive = activeStage === idx;
           return (
             <button
@@ -115,14 +113,15 @@ export function CinemaOverlay({ scrollProgress, activeStage, onJumpToStage }: Ci
         })}
       </nav>
 
-      {/* STAGE 0: HERO / GENESIS */}
+      {/* STAGE 0: FRAME 1 HOOK (NO PROJECTS — PURE VISUAL HOOK & LIQUID CURSOR REACTION) */}
       <section
         style={{ opacity: opacities[0], pointerEvents: opacities[0] > 0.4 ? 'auto' : 'none' }}
         className="fixed inset-0 flex flex-col justify-center px-8 md:px-20 max-w-3xl transition-opacity duration-300"
       >
         <div className="space-y-6">
           <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono-code text-xs">
-            <span>HUMAN INFRASTRUCTURE & APPLIED SYSTEMS</span>
+            <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+            <span>HUMAN INFRASTRUCTURE FOR THE COMPUTATIONAL ERA</span>
           </div>
 
           <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight font-serif-book text-slate-100 leading-none">
@@ -131,7 +130,7 @@ export function CinemaOverlay({ scrollProgress, activeStage, onJumpToStage }: Ci
           </h1>
 
           <p className="text-base md:text-lg text-slate-300 font-mono-code max-w-xl leading-relaxed">
-            Architecting high-concurrency microservices, quantum physics simulations, and low-latency computer vision pipelines.
+            Move your cursor across the liquid obsidian core to distort light caustics. Scroll downward to ignite the luminous thread and traverse project architectures.
           </p>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2 max-w-lg">
@@ -143,9 +142,9 @@ export function CinemaOverlay({ scrollProgress, activeStage, onJumpToStage }: Ci
             ))}
           </div>
 
-          <div className="pt-6 flex items-center space-x-2 text-xs font-mono-code text-slate-400">
+          <div className="pt-6 flex items-center space-x-2 text-xs font-mono-code text-emerald-400/90">
             <ChevronDown className="w-4 h-4 text-emerald-400 animate-bounce" />
-            <span>Scroll downward to traverse project architectures</span>
+            <span>Scroll downward to ignite the luminous 3D thread ↓</span>
           </div>
         </div>
       </section>
@@ -160,6 +159,7 @@ export function CinemaOverlay({ scrollProgress, activeStage, onJumpToStage }: Ci
             <div className="flex items-center space-x-2 text-xs font-mono-code text-emerald-400">
               <span className="px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">01</span>
               <span>{PROJECTS[0].category.toUpperCase()}</span>
+              <span className="text-slate-500">• Hover on 3D frame to inspect</span>
             </div>
 
             <h2 className="text-3xl md:text-4xl font-bold font-serif-book text-slate-100">
@@ -171,7 +171,6 @@ export function CinemaOverlay({ scrollProgress, activeStage, onJumpToStage }: Ci
               {PROJECTS[0].description}
             </p>
 
-            {/* Metrics */}
             <div className="grid grid-cols-3 gap-2">
               {PROJECTS[0].stats.map((s, i) => (
                 <div key={i} className="p-2 rounded-lg bg-slate-900/60 border border-slate-800 text-center">
@@ -181,7 +180,6 @@ export function CinemaOverlay({ scrollProgress, activeStage, onJumpToStage }: Ci
               ))}
             </div>
 
-            {/* Code Snippet Terminal */}
             <div className="rounded-lg bg-slate-900/90 border border-slate-800 overflow-hidden font-mono-code text-[10px]">
               <div className="flex items-center justify-between px-3 py-1.5 bg-slate-950/80 border-b border-slate-800 text-slate-400">
                 <div className="flex items-center space-x-1.5">
@@ -227,6 +225,7 @@ export function CinemaOverlay({ scrollProgress, activeStage, onJumpToStage }: Ci
             <div className="flex items-center space-x-2 text-xs font-mono-code text-emerald-400">
               <span className="px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">02</span>
               <span>{PROJECTS[1].category.toUpperCase()}</span>
+              <span className="text-slate-500">• Hover on 3D frame to inspect</span>
             </div>
 
             <h2 className="text-3xl md:text-4xl font-bold font-serif-book text-slate-100">
@@ -292,6 +291,7 @@ export function CinemaOverlay({ scrollProgress, activeStage, onJumpToStage }: Ci
             <div className="flex items-center space-x-2 text-xs font-mono-code text-cyan-400">
               <span className="px-2 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/20">03</span>
               <span>{PROJECTS[2].category.toUpperCase()}</span>
+              <span className="text-slate-500">• Hover on 3D frame to inspect</span>
             </div>
 
             <h2 className="text-3xl md:text-4xl font-bold font-serif-book text-slate-100">
@@ -395,9 +395,9 @@ export function CinemaOverlay({ scrollProgress, activeStage, onJumpToStage }: Ci
       </section>
 
       {/* Bottom Progress Bar */}
-      <footer className="fixed bottom-0 left-0 right-0 z-30 px-6 py-4 flex items-center justify-between pointer-events-auto bg-gradient-to-t from-[#040a08] to-transparent">
+      <footer className="fixed bottom-0 left-0 right-0 z-30 px-6 py-4 flex items-center justify-between pointer-events-auto bg-gradient-to-t from-[#030907] to-transparent">
         <div className="flex items-center space-x-3 text-[11px] font-mono-code text-slate-400">
-          <span>PROGRESS</span>
+          <span>JOURNEY</span>
           <div className="w-32 h-1 bg-slate-800 rounded-full overflow-hidden">
             <div
               className="h-full bg-emerald-400 transition-all duration-75"
@@ -408,7 +408,7 @@ export function CinemaOverlay({ scrollProgress, activeStage, onJumpToStage }: Ci
         </div>
 
         <span className="text-[10px] text-slate-500 font-mono-code hidden sm:inline">
-          Scroll smoothly • 3D Inertial Scrollytelling
+          Move mouse to interact with 3D elements • Scroll to traverse thread
         </span>
       </footer>
     </div>
