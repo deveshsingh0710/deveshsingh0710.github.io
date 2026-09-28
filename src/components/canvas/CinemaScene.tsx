@@ -9,65 +9,66 @@ import { HealthcareStage } from './stages/HealthcareStage';
 import { TerminalStage } from './stages/TerminalStage';
 
 interface CinemaSceneProps {
-  scrollProgress: number; // 0.0 to 1.0
+  scrollProgress: number; // 0.0 to 1.0 (real page scroll)
 }
 
-function SceneCameraAndStages({ scrollProgress }: { scrollProgress: number }) {
-  // Helper to calculate smooth bell curve opacity for each stage
-  const getStageOpacity = (center: number, width: number = 0.22) => {
-    const dist = Math.abs(scrollProgress - center);
-    if (dist > width) return 0;
-    return (Math.cos((dist / width) * Math.PI) + 1) / 2;
-  };
-
-  const opacities = [
-    getStageOpacity(0.0, 0.22),
-    getStageOpacity(0.25, 0.22),
-    getStageOpacity(0.50, 0.22),
-    getStageOpacity(0.75, 0.22),
-    getStageOpacity(1.0, 0.22)
-  ];
-
+function SceneCameraAndWorld({ scrollProgress }: { scrollProgress: number }) {
   useFrame((state) => {
-    // Cinematic camera travel along scroll progress
-    const targetY = -scrollProgress * 2.2;
-    const targetZ = 6.8 + Math.sin(scrollProgress * Math.PI) * 0.8;
-    const targetRotX = scrollProgress * 0.12;
+    // Camera smoothly descends along the vertical spine from y = 0 to y = -12.0
+    const targetY = -scrollProgress * 12.0;
+    const targetZ = 6.8 + Math.sin(scrollProgress * Math.PI) * 0.6;
+    const targetRotX = (state.pointer.y * 0.1);
+    const targetRotY = (state.pointer.x * 0.15);
 
     state.camera.position.y = THREE.MathUtils.lerp(state.camera.position.y, targetY, 0.08);
     state.camera.position.z = THREE.MathUtils.lerp(state.camera.position.z, targetZ, 0.08);
-    state.camera.rotation.x = THREE.MathUtils.lerp(state.camera.rotation.x, targetRotX, 0.08);
+    state.camera.rotation.x = THREE.MathUtils.lerp(state.camera.rotation.x, targetRotX, 0.05);
+    state.camera.rotation.y = THREE.MathUtils.lerp(state.camera.rotation.y, targetRotY, 0.05);
   });
 
   return (
     <>
-      {/* The 3D Luminous Fiber Thread connecting all stages */}
+      {/* Continuous 3D Luminous Fiber Thread running through the entire height */}
       <LuminousThread scrollProgress={scrollProgress} />
 
-      {/* Dynamic Stages along the thread */}
+      {/* 3D Stations physically positioned down the Y axis */}
       <group position={[0, 0, 0]}>
-        {/* Frame 1: Pure Liquid Obsidian Core (Cursor-reactive, NO early projects) */}
-        <LiquidCore opacity={opacities[0]} />
+        {/* y = 0 : Frame 1 Liquid Obsidian Core */}
+        <group position={[0, 0, 0]}>
+          <LiquidCore opacity={1} />
+        </group>
 
-        {/* Project Stations inside Realistic Hardware Frames */}
-        <QuantumStage opacity={opacities[1]} />
-        <VisionStage opacity={opacities[2]} />
-        <HealthcareStage opacity={opacities[3]} />
-        <TerminalStage opacity={opacities[4]} />
+        {/* y = -3.0 : Project 1 Quantum Tunneling */}
+        <group position={[0, -3.0, 0]}>
+          <QuantumStage opacity={1} />
+        </group>
+
+        {/* y = -6.0 : Project 2 LabelChecker AI */}
+        <group position={[0, -6.0, 0]}>
+          <VisionStage opacity={1} />
+        </group>
+
+        {/* y = -9.0 : Project 3 Healthcare System */}
+        <group position={[0, -9.0, 0]}>
+          <HealthcareStage opacity={1} />
+        </group>
+
+        {/* y = -12.0 : Terminal / Contact Core */}
+        <group position={[0, -12.0, 0]}>
+          <TerminalStage opacity={1} />
+        </group>
       </group>
 
-      {/* Infinite Horizon Floor Grid with subtle fade */}
-      <gridHelper
-        args={[36, 72, '#064e3b', '#021812']}
-        position={[0, -2.4, 0]}
-      />
+      {/* Multi-tier Horizon Grids across the descent */}
+      <gridHelper args={[40, 80, '#064e3b', '#021812']} position={[0, -2.2, 0]} />
+      <gridHelper args={[40, 80, '#064e3b', '#021812']} position={[0, -14.2, 0]} />
     </>
   );
 }
 
 export function CinemaScene({ scrollProgress }: CinemaSceneProps) {
   return (
-    <div className="absolute inset-0 w-full h-full pointer-events-auto">
+    <div className="fixed inset-0 w-full h-full pointer-events-auto z-0">
       <Canvas
         camera={{ position: [0, 0, 7.2], fov: 45 }}
         gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
@@ -75,24 +76,23 @@ export function CinemaScene({ scrollProgress }: CinemaSceneProps) {
       >
         <color attach="background" args={['#030907']} />
 
-        {/* Studio Lighting Rig */}
+        {/* Studio Lighting */}
         <ambientLight intensity={0.7} />
-
         <directionalLight position={[6, 9, 6]} intensity={2.5} color="#ecfdf5" />
         <directionalLight position={[-6, -4, -3]} intensity={1.8} color="#10b981" />
         <directionalLight position={[0, -6, 5]} intensity={1.2} color="#06b6d4" />
 
-        {/* Volumetric Floating Dust Particles */}
+        {/* Floating Atmospheric Sparkles */}
         <Sparkles
-          count={80}
-          scale={[14, 12, 12]}
-          size={1.6}
-          speed={0.25}
+          count={90}
+          scale={[16, 24, 14]}
+          size={1.8}
+          speed={0.2}
           opacity={0.35}
           color="#34d399"
         />
 
-        <SceneCameraAndStages scrollProgress={scrollProgress} />
+        <SceneCameraAndWorld scrollProgress={scrollProgress} />
       </Canvas>
     </div>
   );
